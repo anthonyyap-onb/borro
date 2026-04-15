@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../build/Borro.Api.props" />
-</Project>
