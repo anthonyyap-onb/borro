@@ -23,7 +23,7 @@ This document serves as the master blueprint for the MVP of **Borro**, a web-bas
 ### 1.1 Docker & Environment
 - **Action:** Create `docker-compose.yml` in the root.
 - **Services:**
-  - `db`: `postgres:15`. Expose port 5432.
+  - `db`: `postgres:15`. Expose host port 5234 (mapped to container 5432).
   - `minio`: `minio/minio`. Expose ports 9000 and 9001. Create a `borro-assets` bucket.
 
 ### 1.2 EF Core Setup & User Schema

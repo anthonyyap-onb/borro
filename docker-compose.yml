@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: borro_user
       POSTGRES_PASSWORD: borro_pass
     ports:
-      - "5432:5432"
+      - "5234:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
