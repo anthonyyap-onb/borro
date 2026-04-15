@@ -54,6 +54,21 @@ services:
         echo 'MinIO bucket borro-assets ready.'
       "
 
+  # ─── EF Core Migrations (one-shot) ───────────────────────────────────────────
+  db_migration:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: migrations
+    container_name: borro_db_migration
+    restart: "no"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=borro;Username=borro_user;Password=borro_pass"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   # ─── ASP.NET Core Backend ────────────────────────────────────────────────────
   backend:
     build:
@@ -66,10 +81,12 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=borro;Username=borro_user;Password=borro_pass"
     ports:
-      - "8080:8080"
+      - "8180:8080"
     depends_on:
       postgres:
         condition: service_healthy
+      db_migration:
+        condition: service_completed_successfully
 
   # ─── React Frontend (Vite dev server) ────────────────────────────────────────
   frontend:
@@ -80,7 +97,7 @@ services:
     restart: unless-stopped
     environment:
       # This is read by Vite at startup inside the container
-      VITE_API_URL: http://localhost:8080
+      VITE_API_URL: http://localhost:8180
     ports:
       - "5173:5173"
     volumes:
