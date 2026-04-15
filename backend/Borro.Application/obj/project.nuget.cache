@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "h0czHK4iDBs=",
+  "success": true,
+  "projectFilePath": "/home/antdlyap/vibecoded-projs/borro/backend/Borro.Application/Borro.Application.csproj",
+  "expectedPackageFiles": [
+    "/home/antdlyap/.nuget/packages/mediatr/12.5.0/mediatr.12.5.0.nupkg.sha512",
+    "/home/antdlyap/.nuget/packages/mediatr.contracts/2.0.1/mediatr.contracts.2.0.1.nupkg.sha512",
+    "/home/antdlyap/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.0/microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

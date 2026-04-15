@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "5YRIAUOz85Yvq5HIYlVfN2DWmIqljg98LntRHsNYPJ0=",
+  "Source": "Borro.Api",
+  "BasePath": "_content/Borro.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
