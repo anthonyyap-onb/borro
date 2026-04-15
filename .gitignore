@@ -1,0 +1,172 @@
+# =============================================================================
+# Borro — root .gitignore (Visual Studio 2026 + React/TypeScript mono-repo)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Visual Studio 2026 / Rider / VS Code
+# -----------------------------------------------------------------------------
+.vs/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.DotSettings.user
+*.swp
+*.swo
+
+# -----------------------------------------------------------------------------
+# .NET / MSBuild build outputs
+# -----------------------------------------------------------------------------
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Ll]og/
+[Ll]ogs/
+[Pp]ublish/
+PublishScripts/
+artifacts/
+
+# Build + test results
+*.binlog
+*.trx
+*.coverage
+*.coveragexml
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+coverage/
+*.opencover.xml
+
+# NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+
+# Roslyn / Source generator caches
+.roslyn/
+*.sourcelink.json
+
+# EF Core local design-time
+*.mdf
+*.ldf
+*.ndf
+
+# JetBrains ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Debugger / profilers
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# ClickOnce / MSIX
+*.appx
+*.appxbundle
+*.msix
+*.msixbundle
+
+# -----------------------------------------------------------------------------
+# Node.js / React / TypeScript / Vite
+# -----------------------------------------------------------------------------
+node_modules/
+.pnp
+.pnp.js
+.pnpm-store/
+.yarn/cache/
+.yarn/install-state.gz
+
+# Build output
+dist/
+dist-ssr/
+build/
+out/
+.next/
+.nuxt/
+.turbo/
+.vite/
+.parcel-cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# Test / coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Caches
+.eslintcache
+.stylelintcache
+.cache/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Local artifacts
+*.local
+
+# Playwright / Cypress
+playwright-report/
+test-results/
+cypress/videos/
+cypress/screenshots/
+
+# -----------------------------------------------------------------------------
+# Environment / secrets
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.docker
+*.pfx
+*.p12
+secrets.json
+appsettings.*.Local.json
+appsettings.Development.local.json
+
+# -----------------------------------------------------------------------------
+# Docker
+# -----------------------------------------------------------------------------
+docker-compose.override.yml
+
+# -----------------------------------------------------------------------------
+# OS
+# -----------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
