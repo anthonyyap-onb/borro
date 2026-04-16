@@ -26,6 +26,11 @@ public class BorroDbContext : DbContext, IApplicationDbContext
             entity.Property(u => u.LastName).IsRequired().HasMaxLength(100);
         });
 
+        modelBuilder.Entity<Wishlist>(entity =>
+        {
+            entity.HasKey(w => new { w.UserId, w.ItemId });
+        });
+
         modelBuilder.Entity<Item>(entity =>
         {
             entity.HasKey(i => i.Id);
