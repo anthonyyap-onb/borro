@@ -1,4 +1,5 @@
 using Borro.Domain.Entities;
+using Borro.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -19,7 +20,7 @@ public class DatabaseSeeder
 
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
-        // Apply pending migrations automatically on startup
+        // Apply pending migrations automatically on startup.
         await _context.Database.MigrateAsync(cancellationToken);
 
         if (await _context.Users.AnyAsync(cancellationToken))
@@ -30,53 +31,38 @@ public class DatabaseSeeder
 
         _logger.LogInformation("Seeding database with initial data...");
 
-        var now = _timeProvider.GetUtcNow().UtcDateTime;
+        var seedUserId = Guid.NewGuid();
 
         var dummyUser = new User
         {
-            Id = Guid.NewGuid(),
+            Id = seedUserId,
             Email = "seed@borro.dev",
             FirstName = "Borro",
             LastName = "Seed",
-            CreatedAtUtc = now,
-            UpdatedAtUtc = now
+            CreatedAtUtc = _timeProvider.GetUtcNow().UtcDateTime,
+            UpdatedAtUtc = _timeProvider.GetUtcNow().UtcDateTime
         };
 
-        var car = new Item
-        {
-            Id = Guid.NewGuid(),
-            Title = "Toyota Camry 2022",
-            DailyPrice = 75.00m,
-            Category = "Vehicle",
-            Attributes = new ItemAttributes
-            {
-                Values = new Dictionary<string, object>
-                {
-                    { "Mileage", 15000 },
-                    { "Transmission", "Automatic" }
-                }
-            },
-            CreatedAtUtc = now,
-            UpdatedAtUtc = now
-        };
+        var car = Item.Create(
+            ownerId: seedUserId,
+            title: "Toyota Camry 2022",
+            description: "Well-maintained sedan, great for road trips.",
+            dailyPrice: 75.00m,
+            location: "Sydney, NSW",
+            category: Category.Vehicle);
+        car.Attributes.Mileage = 15000;
+        car.Attributes.Transmission = "Automatic";
 
-        var camera = new Item
-        {
-            Id = Guid.NewGuid(),
-            Title = "Sony Alpha A7 IV",
-            DailyPrice = 50.00m,
-            Category = "Electronics",
-            Attributes = new ItemAttributes
-            {
-                Values = new Dictionary<string, object>
-                {
-                    { "Megapixels", 24 },
-                    { "Brand", "Sony" }
-                }
-            },
-            CreatedAtUtc = now,
-            UpdatedAtUtc = now
-        };
+        var camera = Item.Create(
+            ownerId: seedUserId,
+            title: "Sony Alpha A7 IV",
+            description: "Full-frame mirrorless camera with 33MP sensor.",
+            dailyPrice: 50.00m,
+            location: "Melbourne, VIC",
+            category: Category.Electronics);
+        camera.Attributes.Megapixels = 33;
+        camera.Attributes.Brand = "Sony";
+        camera.Attributes.Condition = "Excellent";
 
         _context.Users.Add(dummyUser);
         _context.Items.AddRange(car, camera);

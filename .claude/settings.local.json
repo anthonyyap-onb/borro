@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp \"C:\\\\Users\\\\GeanKyleUkaLeonor\\\\source\\\\repos\\\\borro\\\\.claude\\\\agents\\\\boro-agent-engineer.md\" \"C:\\\\Users\\\\GeanKyleUkaLeonor\\\\.claude\\\\agents\\\\boro-agent-engineer.md\")",
+      "Read(//c/Users/GeanKyleUkaLeonor/.claude/agents/**)",
+      "Bash(dotnet sln *)",
+      "Bash(dotnet test *)",
+      "Bash(dotnet build *)",
+      "Bash(dotnet ef *)",
+      "Bash(dotnet tool *)",
+      "Bash(claude mcp *)",
+      "Bash(dotnet add *)"
+    ]
+  }
+}

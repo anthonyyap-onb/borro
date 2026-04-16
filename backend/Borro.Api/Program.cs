@@ -50,5 +50,6 @@ app.UseCors(CorsPolicyName);
 
 // ── Endpoints ──────────────────────────────────────────────────────────────────
 app.MapHealthEndpoints();
+app.MapItemEndpoints();
 
 app.Run();
