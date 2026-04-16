@@ -1308,12 +1308,62 @@ git commit -m "feat: add itemApi Axios wrappers"
 
 ---
 
+## Stitch UI Design Reference (project `4142831471135952271`)
+
+> These designs are the source of truth for Tasks 11–13. Implement TSX to match them exactly.
+
+| Task | Screen | Screen ID | Screenshot |
+|------|--------|-----------|------------|
+| Task 11 — CreateListingPage | Create / Edit Listing | `8d3ef420217047a491524278db414634` | ![Create/Edit Listing](https://lh3.googleusercontent.com/aida/ADBb0ui2-s4h8gUyRiXrlkXsBlX2Bj-4iXGtHqJWzEfPu2to-FnVWhEwzHhUsfpDAJAkCvG-Q-VebaRChIlFmE4qpZW-zYa1YIEEJJ-d8ohaL6BLvJtl6cjdBH5OlqrNSKn9ZuOb8999wMNUys7ayzRgWroZ6m_fgxflna01ya9VHUHiK9BMw0uHLHNUa2YFkm-QRFojTawAuYjJOTLZyWtS1LpZ3eqf8VfUssiwXzVkAmQYyNPupC6JDAErAoo) |
+| Task 12 — SearchPage | Search Results | `c08956c0fcfc4c079a6b1973fa0edc6d` | ![Search Results](https://lh3.googleusercontent.com/aida/ADBb0uivke8mQrjD9xa26YT0J--9xxLvGjuFq8XgR2NdcqPk8K6gqoMGkw537ydUyEHKjtOkgKTfJ-BXiSIOKm3afRfENa3jJ7ifg6YCz92Z8ojfv-yPu41wROS1_gYexDMgbtg9gdt0vdTm2f16f-AMSljm1_iR3ERLdSvQwm-XgKhvsYnMR7R0P1pMOL6i41kZEhbY6uhtm0kUxsRfWqhCXKMSGlhewwa9JrtmlNxxNu0_9uXO72jKUqfPVg) |
+| Task 13 — ItemDetailPage | Item Detail Page | `39ff8de157d34ebd86a9bd58f76eb986` | ![Item Detail](https://lh3.googleusercontent.com/aida/ADBb0ujIm4hC7K-o4c6DcEx9SmdLMU3B5HBDllB6CxCsb_Wzkhgvm5Nf_YQghxwmxDaz7tnm9y52u_ICIIMn32P8l0nzwOHf95IoIXCuEdFDQiUbIFBDHmnKBKlcUMSLOlOUo9bsj6T8pP2XSkq4Vryg7fF0W_dBmmoTh-K5RPpACSPRQqWXRBrHUYVsMaIgCxx5TGImafBl-SMIhcKNqddpVIV0KRh2VW_PwlViik96vkOK5E0qwpiKS64rmw) |
+
+### Design System ("The Editorial Exchange")
+- **Colors:** Primary `#005f6c`, Surface `#f9f9f9`, On-surface `#1a1c1c`, On-surface-variant `#3e494b`, Tertiary/action `#a91929`
+- **Fonts:** Headlines — `Plus Jakarta Sans` (bold); Body/labels — `Manrope`
+- **No 1px solid borders** — use `surface-container` background shifts (`bg-[#f3f3f3]`, `bg-[#eeeeee]`) or ghost borders at 15% opacity
+- **Card shadows:** `shadow-[0_4px_24px_rgba(26,28,28,0.06)]`; nav shadow: `shadow-[0_2px_12px_rgba(26,28,28,0.06)]`
+- **Primary CTA:** Pill shape, gradient `bg-gradient-to-r from-[#005f6c] to-[#007a8a]`
+- **Glassmorphism** for floating elements: `bg-white/80 backdrop-blur-md`
+- **Roundness:** `rounded-2xl` (24px) for cards/images; `rounded-xl` (12px) for inputs; `rounded-full` for buttons/chips
+
+### CreateListingPage — Stitch Design Points
+- **Two-column layout:** form fields (left, `flex-1`) + sticky photo upload panel (right, `w-[340px]`)
+- Photo panel: `{imageFiles.length} of 8 uploaded` label; 3-column grid of numbered slots (`1–8`); "Add Photos" dashed-border upload trigger
+- Fields organized in cards (`bg-white rounded-2xl p-6 shadow-...`): Item Details, Category Specs, Pricing, Handover & Options
+- Spec fields rendered in a **2-column grid** per category
+- Pricing: daily rate + minimum rental days (weekend rate is display-only in MVP)
+- Handover options: checkboxes inside `bg-[#f3f3f3] rounded-xl px-4 py-2.5` pill labels
+- Instant Book toggle has a subtitle: "Renters can book without waiting for your approval"
+
+### SearchPage — Stitch Design Points
+- **Left sidebar** (w-72, sticky): filters — Category select, Price Range slider (`$0–$450+`), Location input, Apply Filters pill button
+- Main content: `"Items near {location}"` heading + result count subline
+- Item cards: `bg-white rounded-2xl` with `shadow-[0_4px_24px_...]`; image overlay badges (Instant Book in `#a91929`, heart/favorite); title, location, `$/day`
+- Floating **"Show Map"** dark glassmorphism pill fixed at bottom-center
+- No top filter bar; no explicit 1px borders on cards
+
+### ItemDetailPage — Stitch Design Points
+- **Full-width photo gallery** at top: tall `aspect-[16/7]` main image + horizontal thumbnail strip + `"Show all photos"` ghost button (bottom-right of image)
+- Category badge (`bg-[#daf8ff] text-[#005f6c]`) + star rating with review count (stub: 4.9 / 128)
+- **Host card** (`bg-white rounded-2xl p-5 flex items-center gap-4`): avatar placeholder, owner name, "Identity Verified" badge, "Contact Host" secondary button
+- Description → "Technical Specifications" grid (`grid-cols-2`) → Handover Options chips → Reviews stub
+- **Sticky right booking sidebar** (`lg:sticky lg:top-24 self-start`):
+  - `$X / day` in `font-black text-4xl`
+  - Instant Book badge in `#a91929`
+  - Pick-up / Return `<input type="date">` inside `bg-[#f3f3f3] rounded-xl p-4`
+  - Cost breakdown: daily×days, insurance $15, service $12, total; separator line above total
+  - Gradient "Book Now" / "Request to Book" CTA
+  - `"You won't be charged yet"` footnote in `text-xs text-[#3e494b]`
+
+---
+
 ## Task 11: Frontend — CreateListingPage
 
 **Files:**
 - Create: `frontend/src/features/items/CreateListingPage.tsx`
 
-- [ ] **Step 1: Create the dynamic listing form**
+- [ ] **Step 1: Create the dynamic listing form** _(matches Stitch "Create / Edit Listing" screen)_
 
 ```tsx
 // frontend/src/features/items/CreateListingPage.tsx
@@ -1321,7 +1371,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { itemApi, type CreateItemPayload, type ItemAttributes } from './itemApi';
 
-const CATEGORIES = ['Vehicles', 'Tools', 'Electronics', 'Outdoors', 'Event Gear', 'Other'];
+const CATEGORIES = ['Vehicles', 'Tools & Equipment', 'Electronics', 'Outdoors', 'Event Gear', 'Other'];
 
 const CATEGORY_FIELDS: Record<string, { label: string; key: string; type: 'text' | 'number' }[]> = {
   Vehicles: [
@@ -1330,7 +1380,7 @@ const CATEGORY_FIELDS: Record<string, { label: string; key: string; type: 'text'
     { label: 'Mileage', key: 'Mileage', type: 'number' },
     { label: 'Transmission', key: 'Transmission', type: 'text' },
   ],
-  Tools: [
+  'Tools & Equipment': [
     { label: 'Brand', key: 'Brand', type: 'text' },
     { label: 'Voltage / Power', key: 'Power', type: 'text' },
   ],
@@ -1351,19 +1401,21 @@ const CATEGORY_FIELDS: Record<string, { label: string; key: string; type: 'text'
 };
 
 const HANDOVER_OPTIONS = ['RenterPicksUp', 'OwnerDelivers', 'ThirdPartyDropOff'];
+const MAX_PHOTOS = 8;
 
 export function CreateListingPage() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
 
   const [form, setForm] = useState<CreateItemPayload>({
     title: '',
     description: '',
     dailyPrice: 0,
     location: '',
-    category: 'Tools',
+    category: 'Tools & Equipment',
     attributes: {},
     instantBookEnabled: false,
     handoverOptions: [],
@@ -1382,6 +1434,12 @@ export function CreateListingPage() {
         ? form.handoverOptions.filter(o => o !== opt)
         : [...form.handoverOptions, opt]
     );
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []).slice(0, MAX_PHOTOS);
+    setImageFiles(files);
+    setImagePreviewUrls(files.map(f => URL.createObjectURL(f)));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1403,145 +1461,210 @@ export function CreateListingPage() {
   const dynamicFields = CATEGORY_FIELDS[form.category] ?? [];
 
   return (
-    <div className="min-h-screen bg-surface font-body">
-      <div className="max-w-2xl mx-auto px-6 py-12">
-        <h1 className="font-headline text-3xl font-bold mb-8">List an Item</h1>
+    <div className="min-h-screen bg-[#f9f9f9] font-[Manrope]">
+      {/* Nav */}
+      <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-md shadow-[0_2px_12px_rgba(26,28,28,0.06)]">
+        <div className="max-w-screen-xl mx-auto px-8 h-16 flex items-center gap-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1 text-[#3e494b] bg-transparent border-none cursor-pointer hover:text-[#005f6c] text-sm font-semibold"
+          >
+            <span className="material-symbols-outlined text-base">arrow_back</span>
+          </button>
+          <span className="font-[Plus_Jakarta_Sans] font-black text-xl text-[#005f6c]">Borro</span>
+          <h1 className="font-[Plus_Jakarta_Sans] font-bold text-xl text-[#1a1c1c] ml-4">Create a Listing</h1>
+        </div>
+      </header>
 
+      <div className="max-w-screen-lg mx-auto px-8 py-10">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">{error}</div>
+          <div className="bg-[#ffdad6] text-[#93000a] px-5 py-3 rounded-xl mb-6 text-sm font-semibold">{error}</div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Category */}
-          <div>
-            <label className="block text-sm font-bold mb-1">Category</label>
-            <select
-              className="w-full border border-outline-variant rounded-lg px-4 py-3 bg-surface"
-              value={form.category}
-              onChange={e => set('category', e.target.value)}
-            >
-              {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-            </select>
-          </div>
+        <form onSubmit={handleSubmit}>
+          {/* Two-column layout: form left, photo panel right */}
+          <div className="grid lg:grid-cols-[1fr_340px] gap-8">
 
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-bold mb-1">Title</label>
-            <input
-              required
-              className="w-full border border-outline-variant rounded-lg px-4 py-3"
-              placeholder="e.g. DeWalt 20V Hammer Drill"
-              value={form.title}
-              onChange={e => set('title', e.target.value)}
-            />
-          </div>
+            {/* Left: form cards */}
+            <div className="space-y-6">
 
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-bold mb-1">Description</label>
-            <textarea
-              required
-              rows={4}
-              className="w-full border border-outline-variant rounded-lg px-4 py-3"
-              placeholder="Describe your item, condition, and any usage rules"
-              value={form.description}
-              onChange={e => set('description', e.target.value)}
-            />
-          </div>
+              {/* Item Details card */}
+              <div className="bg-white rounded-2xl p-6 shadow-[0_4px_24px_rgba(26,28,28,0.06)]">
+                <h2 className="font-[Plus_Jakarta_Sans] font-bold text-lg mb-4">Item Details</h2>
+                <div className="space-y-4">
 
-          {/* Dynamic category fields */}
-          {dynamicFields.length > 0 && (
-            <div className="space-y-4 p-4 bg-surface-container-low rounded-xl">
-              <p className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">{form.category} Details</p>
-              {dynamicFields.map(field => (
-                <div key={field.key}>
-                  <label className="block text-sm font-bold mb-1">{field.label}</label>
-                  <input
-                    type={field.type}
-                    className="w-full border border-outline-variant rounded-lg px-4 py-3"
-                    value={(form.attributes as ItemAttributes)[field.key] as string ?? ''}
-                    onChange={e => setAttr(field.key, e.target.value)}
-                  />
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-2">Category</label>
+                    <select
+                      className="w-full bg-[#f3f3f3] rounded-xl px-4 py-3 text-sm font-semibold text-[#1a1c1c]"
+                      value={form.category}
+                      onChange={e => set('category', e.target.value)}
+                    >
+                      {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-2">Title</label>
+                    <input
+                      required
+                      className="w-full bg-[#f3f3f3] rounded-xl px-4 py-3 text-sm text-[#1a1c1c]"
+                      placeholder="e.g. DeWalt 20V Hammer Drill"
+                      value={form.title}
+                      onChange={e => set('title', e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-2">Description</label>
+                    <textarea
+                      required
+                      rows={4}
+                      className="w-full bg-[#f3f3f3] rounded-xl px-4 py-3 text-sm text-[#1a1c1c] resize-none"
+                      placeholder="Describe your item, condition, and any usage rules"
+                      value={form.description}
+                      onChange={e => set('description', e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-2">Location</label>
+                    <input
+                      required
+                      className="w-full bg-[#f3f3f3] rounded-xl px-4 py-3 text-sm text-[#1a1c1c]"
+                      placeholder="City, State"
+                      value={form.location}
+                      onChange={e => set('location', e.target.value)}
+                    />
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
 
-          {/* Price & Location */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-bold mb-1">Daily Price ($)</label>
-              <input
-                required
-                type="number"
-                min="1"
-                step="0.01"
-                className="w-full border border-outline-variant rounded-lg px-4 py-3"
-                value={form.dailyPrice || ''}
-                onChange={e => set('dailyPrice', parseFloat(e.target.value))}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold mb-1">Location</label>
-              <input
-                required
-                className="w-full border border-outline-variant rounded-lg px-4 py-3"
-                placeholder="City, State"
-                value={form.location}
-                onChange={e => set('location', e.target.value)}
-              />
-            </div>
-          </div>
+              {/* Dynamic category specs card */}
+              {dynamicFields.length > 0 && (
+                <div className="bg-white rounded-2xl p-6 shadow-[0_4px_24px_rgba(26,28,28,0.06)]">
+                  <h2 className="font-[Plus_Jakarta_Sans] font-bold text-lg mb-4">{form.category} Specs</h2>
+                  <div className="grid grid-cols-2 gap-4">
+                    {dynamicFields.map(field => (
+                      <div key={field.key}>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-2">{field.label}</label>
+                        <input
+                          type={field.type}
+                          className="w-full bg-[#f3f3f3] rounded-xl px-4 py-3 text-sm text-[#1a1c1c]"
+                          value={(form.attributes as ItemAttributes)[field.key] as string ?? ''}
+                          onChange={e => setAttr(field.key, e.target.value)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          {/* Handover Options */}
-          <div>
-            <label className="block text-sm font-bold mb-2">Handover Options</label>
-            <div className="flex flex-wrap gap-3">
-              {HANDOVER_OPTIONS.map(opt => (
-                <label key={opt} className="flex items-center gap-2 cursor-pointer">
+              {/* Pricing card */}
+              <div className="bg-white rounded-2xl p-6 shadow-[0_4px_24px_rgba(26,28,28,0.06)]">
+                <h2 className="font-[Plus_Jakarta_Sans] font-bold text-lg mb-4">Pricing</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-2">Daily Rate ($)</label>
+                    <input
+                      required
+                      type="number"
+                      min="1"
+                      step="0.01"
+                      className="w-full bg-[#f3f3f3] rounded-xl px-4 py-3 text-sm text-[#1a1c1c]"
+                      value={form.dailyPrice || ''}
+                      onChange={e => set('dailyPrice', parseFloat(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-2">Minimum Rental (days)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      defaultValue={1}
+                      className="w-full bg-[#f3f3f3] rounded-xl px-4 py-3 text-sm text-[#1a1c1c]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Handover & Options card */}
+              <div className="bg-white rounded-2xl p-6 shadow-[0_4px_24px_rgba(26,28,28,0.06)]">
+                <h2 className="font-[Plus_Jakarta_Sans] font-bold text-lg mb-4">Handover & Options</h2>
+
+                <div className="mb-4">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-3">Handover Options</label>
+                  <div className="flex flex-wrap gap-3">
+                    {HANDOVER_OPTIONS.map(opt => (
+                      <label key={opt} className="flex items-center gap-2 cursor-pointer bg-[#f3f3f3] rounded-xl px-4 py-2.5">
+                        <input
+                          type="checkbox"
+                          checked={form.handoverOptions.includes(opt)}
+                          onChange={() => toggleHandover(opt)}
+                          className="accent-[#005f6c]"
+                        />
+                        <span className="text-sm font-semibold text-[#1a1c1c]">{opt.replace(/([A-Z])/g, ' $1').trim()}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <label className="flex items-center gap-3 cursor-pointer bg-[#f3f3f3] rounded-xl px-4 py-3">
                   <input
                     type="checkbox"
-                    checked={form.handoverOptions.includes(opt)}
-                    onChange={() => toggleHandover(opt)}
+                    checked={form.instantBookEnabled}
+                    onChange={e => set('instantBookEnabled', e.target.checked)}
+                    className="accent-[#005f6c]"
                   />
-                  <span className="text-sm">{opt.replace(/([A-Z])/g, ' $1').trim()}</span>
+                  <div>
+                    <p className="font-bold text-sm text-[#1a1c1c]">Enable Instant Book</p>
+                    <p className="text-xs text-[#3e494b]">Renters can book without waiting for your approval</p>
+                  </div>
                 </label>
-              ))}
+              </div>
+            </div>
+
+            {/* Right: sticky photo upload panel */}
+            <div>
+              <div className="bg-white rounded-2xl p-6 shadow-[0_4px_24px_rgba(26,28,28,0.06)] lg:sticky lg:top-24">
+                <h2 className="font-[Plus_Jakarta_Sans] font-bold text-lg mb-1">Photos</h2>
+                <p className="text-xs text-[#3e494b] mb-4">{imageFiles.length} of {MAX_PHOTOS} uploaded</p>
+
+                {/* Numbered photo slots */}
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {Array.from({ length: MAX_PHOTOS }).map((_, i) => (
+                    <div key={i} className="aspect-square rounded-xl bg-[#f3f3f3] overflow-hidden flex items-center justify-center">
+                      {imagePreviewUrls[i] ? (
+                        <img src={imagePreviewUrls[i]} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[#bdc8cb] font-bold text-lg">{i + 1}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <label className="flex items-center justify-center gap-2 w-full border-2 border-dashed border-[#bdc8cb]/40 rounded-xl py-3 cursor-pointer hover:border-[#005f6c]/40 transition-colors">
+                  <span className="material-symbols-outlined text-[#3e494b]">add_photo_alternate</span>
+                  <span className="text-sm font-semibold text-[#3e494b]">Add Photos</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handlePhotoChange}
+                    className="hidden"
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full mt-6 bg-gradient-to-r from-[#005f6c] to-[#007a8a] text-white rounded-full py-4 font-bold hover:opacity-90 transition-opacity disabled:opacity-50 border-none"
+                >
+                  {submitting ? 'Creating...' : 'Create Listing'}
+                </button>
+              </div>
             </div>
           </div>
-
-          {/* Instant Book */}
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.instantBookEnabled}
-              onChange={e => set('instantBookEnabled', e.target.checked)}
-            />
-            <span className="font-bold">Enable Instant Book</span>
-          </label>
-
-          {/* Images */}
-          <div>
-            <label className="block text-sm font-bold mb-1">Photos</label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={e => setImageFiles(Array.from(e.target.files ?? []))}
-              className="w-full"
-            />
-            {imageFiles.length > 0 && (
-              <p className="text-sm text-on-surface-variant mt-1">{imageFiles.length} file(s) selected</p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full bg-primary text-on-primary rounded-full py-4 font-bold hover:opacity-90 transition-opacity disabled:opacity-50 border-none"
-          >
-            {submitting ? 'Creating...' : 'Create Listing'}
-          </button>
         </form>
       </div>
     </div>
@@ -1563,7 +1686,7 @@ git commit -m "feat: add CreateListingPage with dynamic category fields"
 **Files:**
 - Create: `frontend/src/features/items/SearchPage.tsx`
 
-- [ ] **Step 1: Create the search and filter grid**
+- [ ] **Step 1: Create the search and filter grid** _(matches Stitch "Search Results" screen)_
 
 ```tsx
 // frontend/src/features/items/SearchPage.tsx
@@ -1571,12 +1694,13 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { itemApi, type ItemDto } from './itemApi';
 
-const CATEGORIES = ['All', 'Vehicles', 'Tools', 'Electronics', 'Outdoors', 'Event Gear', 'Other'];
+const CATEGORIES = ['All Categories', 'Vehicles', 'Tools & Equipment', 'Electronics', 'Outdoors', 'Event Gear', 'Other'];
 
 export function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [items, setItems] = useState<ItemDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pendingMaxPrice, setPendingMaxPrice] = useState(450);
 
   const category = searchParams.get('category') ?? '';
   const location = searchParams.get('location') ?? '';
@@ -1597,70 +1721,140 @@ export function SearchPage() {
     setSearchParams(next);
   };
 
+  const applyFilters = () => {
+    setFilter('maxPrice', pendingMaxPrice < 450 ? String(pendingMaxPrice) : '');
+  };
+
   return (
-    <div className="min-h-screen bg-surface font-body">
-      {/* Filter bar */}
-      <div className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-outline-variant/20 px-6 py-4">
-        <div className="max-w-screen-2xl mx-auto flex flex-wrap gap-4 items-center">
-          <select
-            className="border border-outline-variant rounded-full px-4 py-2 text-sm font-semibold bg-surface"
-            value={category}
-            onChange={e => setFilter('category', e.target.value === 'All' ? '' : e.target.value)}
-          >
-            {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-          </select>
-
-          <input
-            className="border border-outline-variant rounded-full px-4 py-2 text-sm"
-            placeholder="Location..."
-            value={location}
-            onChange={e => setFilter('location', e.target.value)}
-          />
-
-          <input
-            type="number"
-            className="border border-outline-variant rounded-full px-4 py-2 text-sm w-36"
-            placeholder="Max $/day"
-            value={maxPrice ?? ''}
-            onChange={e => setFilter('maxPrice', e.target.value)}
-          />
+    <div className="min-h-screen bg-[#f9f9f9] font-[Manrope]">
+      {/* Nav */}
+      <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-md shadow-[0_2px_12px_rgba(26,28,28,0.06)]">
+        <div className="max-w-screen-2xl mx-auto px-8 h-16 flex items-center gap-6">
+          <span className="font-[Plus_Jakarta_Sans] font-black text-2xl text-[#005f6c]">Borro</span>
+          <nav className="flex gap-6 ml-auto text-sm font-semibold text-[#1a1c1c]">
+            <a href="#" className="text-[#005f6c]">Explore</a>
+            <Link to="/items/new">List an Item</Link>
+            <a href="#">How it Works</a>
+          </nav>
         </div>
+      </header>
+
+      <div className="max-w-screen-2xl mx-auto px-8 py-8 flex gap-8">
+
+        {/* Left sidebar filters */}
+        <aside className="w-72 shrink-0">
+          <div className="bg-white rounded-2xl p-6 shadow-[0_4px_24px_rgba(26,28,28,0.06)]">
+            <h2 className="font-[Plus_Jakarta_Sans] font-bold text-lg mb-5">Filters</h2>
+
+            <div className="mb-5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-2">Category</label>
+              <select
+                className="w-full bg-[#f3f3f3] rounded-xl px-4 py-2.5 text-sm font-semibold text-[#1a1c1c]"
+                value={category || 'All Categories'}
+                onChange={e => setFilter('category', e.target.value === 'All Categories' ? '' : e.target.value)}
+              >
+                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+
+            <div className="mb-5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-2">Price Range (per day)</label>
+              <div className="flex items-center justify-between text-sm text-[#3e494b] mb-2">
+                <span>$0</span>
+                <span>{pendingMaxPrice >= 450 ? '$450+' : `$${pendingMaxPrice}`}</span>
+              </div>
+              <input
+                type="range" min="0" max="450" step="10"
+                value={pendingMaxPrice}
+                onChange={e => setPendingMaxPrice(Number(e.target.value))}
+                className="w-full accent-[#005f6c]"
+              />
+            </div>
+
+            <div className="mb-5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-2">Location</label>
+              <input
+                className="w-full bg-[#f3f3f3] rounded-xl px-4 py-2.5 text-sm text-[#1a1c1c]"
+                placeholder="City, State..."
+                defaultValue={location}
+                onBlur={e => setFilter('location', e.target.value)}
+              />
+            </div>
+
+            <button
+              onClick={applyFilters}
+              className="w-full bg-[#005f6c] text-white rounded-full py-3 font-bold text-sm hover:bg-[#007a8a] transition-colors border-none cursor-pointer"
+            >
+              Apply Filters
+            </button>
+          </div>
+        </aside>
+
+        {/* Main results area */}
+        <main className="flex-1 min-w-0">
+          <div className="mb-6">
+            <h1 className="font-[Plus_Jakarta_Sans] font-bold text-2xl text-[#1a1c1c]">
+              {location ? `Items near ${location}` : 'All Items'}
+            </h1>
+            {!loading && (
+              <p className="text-sm text-[#3e494b] mt-1">
+                Showing {items.length} result{items.length !== 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
+
+          {loading ? (
+            <p className="text-[#3e494b]">Loading...</p>
+          ) : items.length === 0 ? (
+            <p className="text-[#3e494b]">No items found. Try adjusting the filters.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              {items.map(item => (
+                <Link key={item.id} to={`/items/${item.id}`} className="group block">
+                  <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(26,28,28,0.06)] hover:shadow-[0_8px_32px_rgba(26,28,28,0.10)] transition-shadow">
+                    <div className="relative aspect-[4/3] overflow-hidden bg-[#e8e8e8]">
+                      {item.imageUrls[0] ? (
+                        <img
+                          src={item.imageUrls[0]}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[#3e494b]">
+                          <span className="material-symbols-outlined text-5xl">image</span>
+                        </div>
+                      )}
+                      {item.instantBookEnabled && (
+                        <span className="absolute top-3 left-3 bg-[#a91929]/90 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">
+                          Instant Book
+                        </span>
+                      )}
+                      <button className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-[#3e494b] hover:text-[#a91929] transition-colors border-none cursor-pointer">
+                        <span className="material-symbols-outlined text-base">favorite</span>
+                      </button>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-[Plus_Jakarta_Sans] font-bold text-[#1a1c1c] mb-1 truncate">{item.title}</h3>
+                      <p className="text-xs text-[#3e494b] mb-2">{item.location}</p>
+                      <div className="flex items-baseline gap-1">
+                        <span className="font-black text-xl text-[#005f6c]">${item.dailyPrice}</span>
+                        <span className="text-xs text-[#3e494b]">/day</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </main>
       </div>
 
-      <div className="max-w-screen-2xl mx-auto px-6 py-10">
-        {loading ? (
-          <p className="text-on-surface-variant">Loading...</p>
-        ) : items.length === 0 ? (
-          <p className="text-on-surface-variant">No items found. Try adjusting the filters.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {items.map(item => (
-              <Link key={item.id} to={`/items/${item.id}`} className="group cursor-pointer">
-                <div className="aspect-[4/5] rounded-xl overflow-hidden mb-4 bg-surface-container-low">
-                  {item.imageUrls[0] ? (
-                    <img
-                      src={item.imageUrls[0]}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
-                      <span className="material-symbols-outlined text-4xl">image</span>
-                    </div>
-                  )}
-                  {item.instantBookEnabled && (
-                    <div className="absolute bottom-4 left-4 bg-primary/90 text-on-primary px-3 py-1 rounded-full text-xs font-bold">
-                      Instant Book
-                    </div>
-                  )}
-                </div>
-                <h3 className="font-bold text-lg text-on-surface">{item.title}</h3>
-                <p className="text-sm text-on-surface-variant">{item.location}</p>
-                <span className="font-black text-xl text-primary">${item.dailyPrice}<span className="text-xs font-medium text-on-surface-variant"> / day</span></span>
-              </Link>
-            ))}
-          </div>
-        )}
+      {/* Floating "Show Map" pill */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-10">
+        <button className="flex items-center gap-2 bg-[#1a1c1c]/80 backdrop-blur-md text-white px-5 py-3 rounded-full font-bold text-sm shadow-lg hover:bg-[#1a1c1c] transition-colors border-none cursor-pointer">
+          <span className="material-symbols-outlined text-base">map</span>
+          Show Map
+        </button>
       </div>
     </div>
   );
@@ -1681,12 +1875,12 @@ git commit -m "feat: add SearchPage with category/location/price filters"
 **Files:**
 - Create: `frontend/src/features/items/ItemDetailPage.tsx`
 
-- [ ] **Step 1: Create item detail view**
+- [ ] **Step 1: Create item detail view** _(matches Stitch "Item Detail Page" screen)_
 
 ```tsx
 // frontend/src/features/items/ItemDetailPage.tsx
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { itemApi, type ItemDto } from './itemApi';
 
 export function ItemDetailPage() {
@@ -1704,73 +1898,131 @@ export function ItemDetailPage() {
       .finally(() => setLoading(false));
   }, [id, navigate]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center font-[Manrope]">Loading...</div>;
   if (!item) return null;
 
   const attrs = Object.entries(item.attributes);
 
   return (
-    <div className="min-h-screen bg-surface font-body">
-      <div className="max-w-screen-lg mx-auto px-6 py-10">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-on-surface-variant mb-6 bg-transparent border-none p-0 cursor-pointer hover:text-primary transition-colors">
-          <span className="material-symbols-outlined">arrow_back</span> Back
-        </button>
+    <div className="min-h-screen bg-[#f9f9f9] font-[Manrope]">
+      {/* Nav */}
+      <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-md shadow-[0_2px_12px_rgba(26,28,28,0.06)]">
+        <div className="max-w-screen-xl mx-auto px-8 h-16 flex items-center gap-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1 text-[#3e494b] bg-transparent border-none cursor-pointer hover:text-[#005f6c] transition-colors text-sm font-semibold"
+          >
+            <span className="material-symbols-outlined text-base">arrow_back</span> Back
+          </button>
+          <span className="font-[Plus_Jakarta_Sans] font-black text-xl text-[#005f6c] ml-2">Borro</span>
+          <div className="flex gap-4 ml-auto text-sm font-semibold">
+            <Link to="/items/new" className="text-[#1a1c1c] no-underline">List an Item</Link>
+          </div>
+        </div>
+      </header>
 
-        <div className="grid lg:grid-cols-2 gap-10">
-          {/* Images */}
-          <div>
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-surface-container-low mb-3">
-              {item.imageUrls[selectedImage] ? (
-                <img src={item.imageUrls[selectedImage]} alt={item.title} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
-                  <span className="material-symbols-outlined text-6xl">image</span>
-                </div>
-              )}
-            </div>
-            {item.imageUrls.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto">
+      <div className="max-w-screen-xl mx-auto px-8 py-8">
+        {/* Full-width photo gallery */}
+        <div className="relative mb-8">
+          <div className="aspect-[16/7] rounded-2xl overflow-hidden bg-[#e8e8e8]">
+            {item.imageUrls[selectedImage] ? (
+              <img src={item.imageUrls[selectedImage]} alt={item.title} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[#3e494b]">
+                <span className="material-symbols-outlined text-7xl">image</span>
+              </div>
+            )}
+          </div>
+          {item.imageUrls.length > 1 && (
+            <>
+              <div className="flex gap-3 mt-3 overflow-x-auto pb-1">
                 {item.imageUrls.map((url, i) => (
-                  <button key={i} onClick={() => setSelectedImage(i)} className={`w-16 h-16 rounded-lg overflow-hidden border-2 shrink-0 p-0 ${i === selectedImage ? 'border-primary' : 'border-transparent'}`}>
+                  <button
+                    key={i}
+                    onClick={() => setSelectedImage(i)}
+                    className={`w-20 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all p-0 ${i === selectedImage ? 'border-[#005f6c]' : 'border-transparent opacity-60'}`}
+                  >
                     <img src={url} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
-            )}
-          </div>
+              <button className="absolute bottom-4 right-4 flex items-center gap-2 bg-white/80 backdrop-blur-sm text-[#1a1c1c] px-4 py-2 rounded-full font-semibold text-sm shadow border-none cursor-pointer">
+                <span className="material-symbols-outlined text-base">grid_view</span> Show all photos
+              </button>
+            </>
+          )}
+        </div>
 
-          {/* Details */}
+        {/* Two-column: details left, booking sidebar right */}
+        <div className="grid lg:grid-cols-[1fr_380px] gap-10">
+
+          {/* Left: item details */}
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-3 py-1 rounded-full">{item.category}</span>
-            <h1 className="font-headline text-3xl font-bold mt-3 mb-2">{item.title}</h1>
-            <p className="text-on-surface-variant mb-4">{item.location} · Listed by {item.ownerName}</p>
-            <div className="flex items-baseline gap-2 mb-6">
-              <span className="font-black text-4xl text-primary">${item.dailyPrice}</span>
-              <span className="text-on-surface-variant">/ day</span>
+            {/* Category + rating */}
+            <div className="flex items-center gap-3 mb-3">
+              <span className="bg-[#daf8ff] text-[#005f6c] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                {item.category}
+              </span>
+              <span className="flex items-center gap-1 text-sm text-[#3e494b]">
+                <span className="material-symbols-outlined text-base text-amber-400">star</span>
+                <span className="font-semibold">4.9</span>
+                <span>(128 reviews)</span>
+              </span>
             </div>
 
-            <p className="text-on-surface mb-6 leading-relaxed">{item.description}</p>
+            <h1 className="font-[Plus_Jakarta_Sans] font-bold text-3xl text-[#1a1c1c] mb-2">{item.title}</h1>
+            <p className="flex items-center gap-2 text-sm text-[#3e494b] mb-6">
+              <span className="material-symbols-outlined text-base">category</span>{item.category}
+              <span className="mx-1">·</span>
+              <span className="material-symbols-outlined text-base">location_on</span>{item.location}
+            </p>
 
+            {/* Host card */}
+            <div className="bg-white rounded-2xl p-5 flex items-center gap-4 shadow-[0_4px_24px_rgba(26,28,28,0.06)] mb-6">
+              <div className="w-12 h-12 rounded-full bg-[#e8e8e8] flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-2xl text-[#3e494b]">person</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-[#3e494b] mb-0.5">Hosted by</p>
+                <p className="font-[Plus_Jakarta_Sans] font-bold text-[#1a1c1c]">{item.ownerName}</p>
+                <p className="text-xs text-[#3e494b] flex items-center gap-1">
+                  <span className="material-symbols-outlined text-xs text-[#005f6c]">verified</span>
+                  Identity Verified
+                </p>
+              </div>
+              <button className="bg-[#d5e0f7] text-[#545f72] px-4 py-2 rounded-full font-semibold text-sm hover:bg-[#bcc7dd] transition-colors border-none cursor-pointer shrink-0">
+                Contact Host
+              </button>
+            </div>
+
+            {/* Description */}
+            <div className="mb-6">
+              <h2 className="font-[Plus_Jakarta_Sans] font-bold text-lg mb-3">About this item</h2>
+              <p className="text-[#3e494b] leading-relaxed">{item.description}</p>
+            </div>
+
+            {/* Technical specs */}
             {attrs.length > 0 && (
-              <div className="bg-surface-container-low rounded-xl p-5 mb-6">
-                <p className="font-bold text-sm uppercase tracking-wider text-on-surface-variant mb-3">Specs</p>
-                <dl className="grid grid-cols-2 gap-2">
+              <div className="bg-white rounded-2xl p-5 shadow-[0_4px_24px_rgba(26,28,28,0.06)] mb-6">
+                <h2 className="font-[Plus_Jakarta_Sans] font-bold text-lg mb-4">Technical Specifications</h2>
+                <dl className="grid grid-cols-2 gap-y-3 gap-x-6">
                   {attrs.map(([k, v]) => (
-                    <div key={k}>
-                      <dt className="text-xs text-on-surface-variant">{k}</dt>
-                      <dd className="font-semibold">{String(v)}</dd>
+                    <div key={k} className="flex flex-col">
+                      <dt className="text-xs text-[#3e494b] font-semibold uppercase tracking-wider">{k}</dt>
+                      <dd className="font-semibold text-[#1a1c1c]">{String(v)}</dd>
                     </div>
                   ))}
                 </dl>
               </div>
             )}
 
+            {/* Handover options */}
             {item.handoverOptions.length > 0 && (
               <div className="mb-6">
-                <p className="font-bold text-sm mb-2">Handover Options</p>
+                <h2 className="font-[Plus_Jakarta_Sans] font-bold text-lg mb-3">Handover Options</h2>
                 <div className="flex flex-wrap gap-2">
                   {item.handoverOptions.map(opt => (
-                    <span key={opt} className="bg-surface-container-low border border-outline-variant/30 rounded-full px-3 py-1 text-sm">
+                    <span key={opt} className="bg-white rounded-full px-4 py-1.5 text-sm font-semibold text-[#1a1c1c] shadow-[0_2px_8px_rgba(26,28,28,0.06)]">
                       {opt.replace(/([A-Z])/g, ' $1').trim()}
                     </span>
                   ))}
@@ -1778,10 +2030,64 @@ export function ItemDetailPage() {
               </div>
             )}
 
-            {/* Book button — Phase 3 will wire this to the booking flow */}
-            <button className="w-full bg-primary text-on-primary rounded-full py-4 font-bold text-lg hover:opacity-90 transition-opacity active:scale-95 border-none">
-              {item.instantBookEnabled ? 'Book Instantly' : 'Request to Book'}
-            </button>
+            {/* Reviews stub */}
+            <div>
+              <h2 className="font-[Plus_Jakarta_Sans] font-bold text-lg mb-3">Community Reviews</h2>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="material-symbols-outlined text-amber-400">star</span>
+                <span className="font-bold text-[#1a1c1c]">4.9</span>
+              </div>
+              <p className="text-sm text-[#3e494b]">Reviews will appear here once renters have completed their bookings.</p>
+            </div>
+          </div>
+
+          {/* Right: sticky booking sidebar */}
+          <div className="lg:sticky lg:top-24 self-start">
+            <div className="bg-white rounded-2xl p-6 shadow-[0_4px_24px_rgba(26,28,28,0.06)]">
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="font-[Plus_Jakarta_Sans] font-black text-4xl text-[#005f6c]">${item.dailyPrice}</span>
+                <span className="text-[#3e494b] text-sm">/ day</span>
+              </div>
+              {item.instantBookEnabled && (
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-[#a91929] bg-[#ffdad8] px-3 py-1 rounded-full mb-4">
+                  <span className="material-symbols-outlined text-xs">bolt</span> Instant Book
+                </span>
+              )}
+
+              {/* Date inputs */}
+              <div className="bg-[#f3f3f3] rounded-xl p-4 mb-4 space-y-3">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-1">Pick up</p>
+                  <input type="date" className="w-full bg-white rounded-lg px-3 py-2 text-sm text-[#1a1c1c]" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-1">Return</p>
+                  <input type="date" className="w-full bg-white rounded-lg px-3 py-2 text-sm text-[#1a1c1c]" />
+                </div>
+              </div>
+
+              {/* Cost breakdown */}
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex justify-between text-[#3e494b]">
+                  <span>${item.dailyPrice} × 1 day</span><span>${item.dailyPrice}</span>
+                </div>
+                <div className="flex justify-between text-[#3e494b]">
+                  <span>Insurance fee</span><span>$15</span>
+                </div>
+                <div className="flex justify-between text-[#3e494b]">
+                  <span>Service fee</span><span>$12</span>
+                </div>
+                <div className="flex justify-between font-bold text-[#1a1c1c] pt-2 border-t border-[#bdc8cb]/20">
+                  <span>Total</span><span>${item.dailyPrice + 27}</span>
+                </div>
+              </div>
+
+              {/* Book CTA — Phase 3 wires to booking flow */}
+              <button className="w-full bg-gradient-to-r from-[#005f6c] to-[#007a8a] text-white rounded-full py-4 font-bold text-base hover:opacity-90 transition-opacity border-none cursor-pointer mb-2">
+                {item.instantBookEnabled ? 'Book Now' : 'Request to Book'}
+              </button>
+              <p className="text-center text-xs text-[#3e494b]">You won't be charged yet</p>
+            </div>
           </div>
         </div>
       </div>
