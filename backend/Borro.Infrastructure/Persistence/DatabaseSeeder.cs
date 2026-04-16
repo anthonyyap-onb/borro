@@ -36,6 +36,7 @@ public class DatabaseSeeder
         {
             Id = Guid.NewGuid(),
             Email = "seed@borro.dev",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("seed-password123"),
             FirstName = "Borro",
             LastName = "Seed",
             CreatedAtUtc = now,

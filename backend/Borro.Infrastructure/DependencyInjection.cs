@@ -1,4 +1,6 @@
+using Borro.Application.Common.Interfaces;
 using Borro.Infrastructure.Persistence;
+using Borro.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +19,10 @@ public static class DependencyInjection
         services.AddDbContext<BorroDbContext>(options =>
             options.UseNpgsql(connectionString));
 
+        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<BorroDbContext>());
+        services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
+        services.AddSingleton<IJwtService, JwtService>();
+        services.AddSingleton<IGoogleTokenVerifier, GoogleTokenVerifier>();
         services.AddScoped<DatabaseSeeder>();
 
         return services;

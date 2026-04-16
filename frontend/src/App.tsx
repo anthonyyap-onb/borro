@@ -1,75 +1,55 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { AuthProvider, useAuth } from './features/auth/AuthContext';
+import { LoginPage } from './features/auth/LoginPage';
+import { ProtectedRoute } from './features/auth/ProtectedRoute';
+import { RegisterPage } from './features/auth/RegisterPage';
 
-interface HealthResult {
-  isHealthy: boolean;
-  message: string;
-  checkedAtUtc: string;
-}
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
 
-const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8080',
-});
-
-function App() {
-  const [health, setHealth] = useState<HealthResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    apiClient
-      .get<HealthResult>('/api/health')
-      .then((res) => setHealth(res.data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
-
+function DashboardPage() {
+  const { user, logout } = useAuth();
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
-      <div className="bg-gray-900 rounded-2xl shadow-2xl p-10 max-w-md w-full text-center">
-        {/* Logo / Brand */}
-        <h1 className="text-4xl font-extrabold text-indigo-400 mb-2 tracking-tight">
-          🔑 Borro
+    <div className="min-h-screen bg-surface flex items-center justify-center font-body">
+      <div className="text-center">
+        <h1 className="font-headline text-4xl font-extrabold text-primary mb-2">
+          Welcome, {user?.firstName}!
         </h1>
-        <p className="text-gray-400 text-sm mb-8">Universal P2P Rental Marketplace</p>
-
-        {/* Status Card */}
-        <div className="rounded-xl border border-gray-700 bg-gray-800 p-6">
-          <h2 className="text-lg font-semibold text-gray-200 mb-4">Backend Health Check</h2>
-
-          {loading && (
-            <p className="text-yellow-400 animate-pulse">Connecting to backend…</p>
-          )}
-
-          {error && (
-            <div className="bg-red-900/40 border border-red-600 rounded-lg p-4">
-              <p className="text-red-400 font-medium">❌ Connection Failed</p>
-              <p className="text-red-300 text-sm mt-1 break-all">{error}</p>
-            </div>
-          )}
-
-          {health && (
-            <div className="space-y-3 text-left">
-              <div className="flex items-center gap-2">
-                <span className={`w-3 h-3 rounded-full ${health.isHealthy ? 'bg-green-400' : 'bg-red-500'}`} />
-                <span className="text-gray-200 font-medium">
-                  {health.isHealthy ? 'Healthy' : 'Unhealthy'}
-                </span>
-              </div>
-              <p className="text-gray-300 text-sm">{health.message}</p>
-              <p className="text-gray-500 text-xs">
-                Checked at: {new Date(health.checkedAtUtc).toLocaleString()}
-              </p>
-            </div>
-          )}
-        </div>
-
-        <p className="text-gray-600 text-xs mt-6">
-          API: {import.meta.env.VITE_API_URL ?? 'http://localhost:8080'}
-        </p>
+        <p className="text-on-surface-variant mb-8">More features coming soon.</p>
+        <button
+          onClick={logout}
+          className="px-6 py-3 bg-primary text-on-primary rounded-full font-bold hover:opacity-90 transition-opacity"
+        >
+          Log Out
+        </button>
       </div>
     </div>
   );
 }
 
+function App() {
+  return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </GoogleOAuthProvider>
+  );
+}
+
 export default App;
+

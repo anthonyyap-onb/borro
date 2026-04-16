@@ -1,10 +1,11 @@
+using Borro.Application.Common.Interfaces;
 using Borro.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Borro.Infrastructure.Persistence;
 
-public class BorroDbContext : DbContext
+public class BorroDbContext : DbContext, IApplicationDbContext
 {
     public BorroDbContext(DbContextOptions<BorroDbContext> options) : base(options) { }
 

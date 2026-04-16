@@ -1,7 +1,10 @@
+using System.Text;
 using Borro.Api.Endpoints;
 using Borro.Application;
 using Borro.Infrastructure;
 using Borro.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,28 @@ builder.Services.AddOpenApi();
 // ── Clean Architecture Layers ──────────────────────────────────────────────────
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// ── Authentication & Authorization ────────────────────────────────────────────
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("JWT signing key 'Jwt:Key' is not configured.");
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "borro-api",
+            ValidAudience = builder.Configuration["Jwt:Audience"] ?? "borro-frontend",
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 // ── CORS ───────────────────────────────────────────────────────────────────────
 const string CorsPolicyName = "BorroFrontend";
@@ -47,8 +72,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(CorsPolicyName);
+app.UseAuthentication();
+app.UseAuthorization();
 
 // ── Endpoints ──────────────────────────────────────────────────────────────────
 app.MapHealthEndpoints();
+app.MapAuthEndpoints();
 
 app.Run();
