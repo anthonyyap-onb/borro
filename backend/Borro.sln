@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Borro.Infrastructure", "Bor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Borro.Api", "Borro.Api\Borro.Api.csproj", "{04B22257-4F64-4080-938F-81AF478D4691}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Borro.Application.Tests", "Borro.Application.Tests\Borro.Application.Tests.csproj", "{CF9950F7-1156-48C8-8F9F-4382A583D9E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{04B22257-4F64-4080-938F-81AF478D4691}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04B22257-4F64-4080-938F-81AF478D4691}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04B22257-4F64-4080-938F-81AF478D4691}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

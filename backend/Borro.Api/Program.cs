@@ -78,5 +78,7 @@ app.UseAuthorization();
 // ── Endpoints ──────────────────────────────────────────────────────────────────
 app.MapHealthEndpoints();
 app.MapAuthEndpoints();
+app.MapItemEndpoints();
+app.MapBlockedDatesEndpoints();
 
 app.Run();

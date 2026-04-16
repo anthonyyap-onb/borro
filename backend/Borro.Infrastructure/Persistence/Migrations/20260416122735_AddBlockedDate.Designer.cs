@@ -3,6 +3,7 @@ using System;
 using Borro.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Borro.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(BorroDbContext))]
-    partial class BorroDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260416122735_AddBlockedDate")]
+    partial class AddBlockedDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,8 +31,8 @@ namespace Borro.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ItemId")
                         .HasColumnType("uuid");

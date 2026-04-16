@@ -3,6 +3,7 @@ using System;
 using Borro.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Borro.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(BorroDbContext))]
-    partial class BorroDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260416092434_ExpandItemDomain")]
+    partial class ExpandItemDomain
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,26 +24,6 @@ namespace Borro.Infrastructure.Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Borro.Domain.Entities.BlockedDate", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<Guid>("ItemId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ItemId", "Date")
-                        .IsUnique();
-
-                    b.ToTable("BlockedDates");
-                });
 
             modelBuilder.Entity("Borro.Domain.Entities.Item", b =>
                 {
@@ -129,17 +112,6 @@ namespace Borro.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("Borro.Domain.Entities.BlockedDate", b =>
-                {
-                    b.HasOne("Borro.Domain.Entities.Item", "Item")
-                        .WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("Borro.Domain.Entities.Item", b =>
