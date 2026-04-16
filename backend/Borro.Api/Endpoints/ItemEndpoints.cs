@@ -99,9 +99,9 @@ public static class ItemEndpoints
                     new UploadItemImageCommand(itemId, userId, stream, file.FileName, file.ContentType), ct);
                 return Results.Ok(new { url });
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                return Results.BadRequest(new { error = ex.Message });
+                return Results.BadRequest(new { error = "Image could not be uploaded." });
             }
             catch (UnauthorizedAccessException)
             {
