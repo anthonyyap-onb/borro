@@ -9,7 +9,8 @@ COPY Borro.Application/Borro.Application.csproj Borro.Application/
 COPY Borro.Infrastructure/Borro.Infrastructure.csproj Borro.Infrastructure/
 COPY Borro.Api/Borro.Api.csproj Borro.Api/
 
-RUN dotnet restore
+# Restore only the API project (and its transitive deps) — excludes test project
+RUN dotnet restore Borro.Api/Borro.Api.csproj
 
 # Copy the rest of the source
 COPY . .
