@@ -1,4 +1,5 @@
 using Borro.Domain.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Borro.Domain.Entities;
 
@@ -28,14 +29,17 @@ public class Item
     public string HandoverOptionsRaw { get; set; } = string.Empty;
 
     /// <summary>Not mapped — computed from HandoverOptionsRaw.</summary>
+    [NotMapped]
     public List<HandoverOption> HandoverOptions
     {
         get => string.IsNullOrEmpty(HandoverOptionsRaw)
             ? new List<HandoverOption>()
             : HandoverOptionsRaw.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(Enum.Parse<HandoverOption>)
+                .Select(s => (Valid: Enum.TryParse<HandoverOption>(s, out var v), Value: v))
+                .Where(x => x.Valid)
+                .Select(x => x.Value)
                 .ToList();
-        set => HandoverOptionsRaw = string.Join(',', value.Select(h => h.ToString()));
+        set => HandoverOptionsRaw = value is null ? string.Empty : string.Join(',', value.Select(h => h.ToString()));
     }
 
     public List<string> ImageUrls { get; set; } = new();
