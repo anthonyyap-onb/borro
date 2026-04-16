@@ -26,25 +26,34 @@ public class BorroDbContext : DbContext, IApplicationDbContext
             entity.Property(u => u.LastName).IsRequired().HasMaxLength(100);
         });
 
-        modelBuilder.Entity<Wishlist>(entity =>
-        {
-            entity.HasKey(w => new { w.UserId, w.ItemId });
-        });
-
         modelBuilder.Entity<Item>(entity =>
         {
             entity.HasKey(i => i.Id);
             entity.Property(i => i.Title).IsRequired().HasMaxLength(200);
+            entity.Property(i => i.Description).IsRequired().HasMaxLength(2000);
             entity.Property(i => i.DailyPrice).HasColumnType("numeric(18,2)");
             entity.Property(i => i.Category).IsRequired().HasMaxLength(100);
+            entity.Property(i => i.Location).IsRequired().HasMaxLength(200);
+            entity.Property(i => i.HandoverOptionsRaw).HasColumnName("handover_options").HasMaxLength(500);
 
-            // Map ItemAttributes as a JSONB column using EF Core 8+ owned entity JSON mapping
+            entity.HasOne(i => i.Owner)
+                .WithMany()
+                .HasForeignKey(i => i.OwnerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ImageUrls stored as PostgreSQL text[]
+            entity.Property(i => i.ImageUrls)
+                .HasColumnType("text[]");
+
+            // Ignore the computed HandoverOptions property — only persist HandoverOptionsRaw
+            entity.Ignore(i => i.HandoverOptions);
+
+            // Map ItemAttributes as JSONB via EF Core 8+ owned entity JSON mapping
             entity.OwnsOne(i => i.Attributes, builder =>
             {
                 builder.ToJson();
 
                 var jsonOptions = (System.Text.Json.JsonSerializerOptions?)null;
-
                 var comparer = new ValueComparer<Dictionary<string, object>>(
                     (c1, c2) => System.Text.Json.JsonSerializer.Serialize(c1, jsonOptions)
                                 == System.Text.Json.JsonSerializer.Serialize(c2, jsonOptions),
@@ -62,6 +71,13 @@ public class BorroDbContext : DbContext, IApplicationDbContext
                     )
                     .Metadata.SetValueComparer(comparer);
             });
+        });
+
+        modelBuilder.Entity<Wishlist>(entity =>
+        {
+            entity.HasKey(w => new { w.UserId, w.ItemId });
+            entity.HasOne(w => w.User).WithMany().HasForeignKey(w => w.UserId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(w => w.Item).WithMany().HasForeignKey(w => w.ItemId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
