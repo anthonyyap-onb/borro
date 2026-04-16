@@ -1,5 +1,5 @@
+using Borro.Application.Common.Interfaces;
 using Borro.Application.Items.DTOs;
-using Borro.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,18 +7,14 @@ namespace Borro.Application.Items.Queries;
 
 public sealed class SearchItemsQueryHandler : IRequestHandler<SearchItemsQuery, SearchItemsResult>
 {
-    private readonly BorroDbContext _context;
+    private readonly IApplicationDbContext _context;
 
-    public SearchItemsQueryHandler(BorroDbContext context)
-    {
-        _context = context;
-    }
+    public SearchItemsQueryHandler(IApplicationDbContext context) => _context = context;
 
     public async Task<SearchItemsResult> Handle(SearchItemsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Items.AsNoTracking().AsQueryable();
+        var query = _context.Items.Include(i => i.Owner).AsNoTracking().AsQueryable();
 
-        // ── Text search ────────────────────────────────────────────────────────────
         if (!string.IsNullOrWhiteSpace(request.SearchText))
         {
             var term = request.SearchText.Trim().ToLower();
@@ -27,47 +23,38 @@ public sealed class SearchItemsQueryHandler : IRequestHandler<SearchItemsQuery, 
                 i.Description.ToLower().Contains(term));
         }
 
-        // ── Location ───────────────────────────────────────────────────────────────
         if (!string.IsNullOrWhiteSpace(request.Location))
         {
             var loc = request.Location.Trim().ToLower();
             query = query.Where(i => i.Location.ToLower().Contains(loc));
         }
 
-        // ── Category ───────────────────────────────────────────────────────────────
         if (request.Category.HasValue)
             query = query.Where(i => i.Category == request.Category.Value);
 
-        // ── Price range ────────────────────────────────────────────────────────────
         if (request.MinPrice.HasValue)
             query = query.Where(i => i.DailyPrice >= request.MinPrice.Value);
 
         if (request.MaxPrice.HasValue)
             query = query.Where(i => i.DailyPrice <= request.MaxPrice.Value);
 
-        // ── Availability: exclude items blocked within the requested date range ───
         if (request.AvailableFrom.HasValue && request.AvailableTo.HasValue)
         {
             var from = DateTime.SpecifyKind(request.AvailableFrom.Value.Date, DateTimeKind.Utc);
             var to = DateTime.SpecifyKind(request.AvailableTo.Value.Date, DateTimeKind.Utc);
-
             query = query.Where(i => !i.BlockedDates.Any(d => d.DateUtc >= from && d.DateUtc <= to));
         }
 
-        // ── Handover options: item must support at least one requested option ─────
         if (request.HandoverOptions is { Count: > 0 })
         {
-            var options = request.HandoverOptions;
-            query = query.Where(i => i.HandoverOptions.Any(h => options.Contains(h)));
+            var optionStrings = request.HandoverOptions.Select(o => o.ToString()).ToList();
+            query = query.Where(i => optionStrings.Any(opt => i.HandoverOptionsRaw.Contains(opt)));
         }
 
-        // ── JSONB attribute filters (EF Core JSON query translation) ──────────────
         if (request.MaxMileage.HasValue)
         {
             var maxMileage = request.MaxMileage.Value;
-            query = query.Where(i =>
-                i.Attributes.Mileage == null ||
-                i.Attributes.Mileage <= maxMileage);
+            query = query.Where(i => i.Attributes.Mileage == null || i.Attributes.Mileage <= maxMileage);
         }
 
         if (!string.IsNullOrWhiteSpace(request.Transmission))
@@ -81,9 +68,7 @@ public sealed class SearchItemsQueryHandler : IRequestHandler<SearchItemsQuery, 
         if (request.MinBedrooms.HasValue)
         {
             var minBedrooms = request.MinBedrooms.Value;
-            query = query.Where(i =>
-                i.Attributes.Bedrooms != null &&
-                i.Attributes.Bedrooms >= minBedrooms);
+            query = query.Where(i => i.Attributes.Bedrooms != null && i.Attributes.Bedrooms >= minBedrooms);
         }
 
         if (!string.IsNullOrWhiteSpace(request.Brand))
@@ -102,7 +87,6 @@ public sealed class SearchItemsQueryHandler : IRequestHandler<SearchItemsQuery, 
                 i.Attributes.Condition.ToLower() == condition);
         }
 
-        // ── Pagination ─────────────────────────────────────────────────────────────
         var page = Math.Max(1, request.Page);
         var pageSize = Math.Clamp(request.PageSize, 1, 100);
 

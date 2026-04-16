@@ -1,5 +1,5 @@
+using Borro.Application.Common.Interfaces;
 using Borro.Domain.Entities;
-using Borro.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,12 +7,9 @@ namespace Borro.Application.Items.Commands;
 
 public sealed class AddToWishlistCommandHandler : IRequestHandler<AddToWishlistCommand, bool?>
 {
-    private readonly BorroDbContext _context;
+    private readonly IApplicationDbContext _context;
 
-    public AddToWishlistCommandHandler(BorroDbContext context)
-    {
-        _context = context;
-    }
+    public AddToWishlistCommandHandler(IApplicationDbContext context) => _context = context;
 
     public async Task<bool?> Handle(AddToWishlistCommand request, CancellationToken cancellationToken)
     {

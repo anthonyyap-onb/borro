@@ -1,4 +1,4 @@
-using Borro.Infrastructure.Persistence;
+using Borro.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,12 +6,9 @@ namespace Borro.Application.Items.Commands;
 
 public sealed class AddBlockedDateCommandHandler : IRequestHandler<AddBlockedDateCommand, bool?>
 {
-    private readonly BorroDbContext _context;
+    private readonly IApplicationDbContext _context;
 
-    public AddBlockedDateCommandHandler(BorroDbContext context)
-    {
-        _context = context;
-    }
+    public AddBlockedDateCommandHandler(IApplicationDbContext context) => _context = context;
 
     public async Task<bool?> Handle(AddBlockedDateCommand request, CancellationToken cancellationToken)
     {

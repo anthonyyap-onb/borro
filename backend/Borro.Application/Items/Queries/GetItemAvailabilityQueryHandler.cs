@@ -1,4 +1,4 @@
-using Borro.Infrastructure.Persistence;
+using Borro.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,12 +6,9 @@ namespace Borro.Application.Items.Queries;
 
 public sealed class GetItemAvailabilityQueryHandler : IRequestHandler<GetItemAvailabilityQuery, List<DateTime>?>
 {
-    private readonly BorroDbContext _context;
+    private readonly IApplicationDbContext _context;
 
-    public GetItemAvailabilityQueryHandler(BorroDbContext context)
-    {
-        _context = context;
-    }
+    public GetItemAvailabilityQueryHandler(IApplicationDbContext context) => _context = context;
 
     public async Task<List<DateTime>?> Handle(GetItemAvailabilityQuery request, CancellationToken cancellationToken)
     {

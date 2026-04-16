@@ -1,6 +1,8 @@
 using Borro.Application.Common.Interfaces;
+using Borro.Application.Common.Settings;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Borro.Application.Items.Commands.UploadItemImage;
 
@@ -8,11 +10,16 @@ public class UploadItemImageCommandHandler : IRequestHandler<UploadItemImageComm
 {
     private readonly IApplicationDbContext _db;
     private readonly IStorageService _storage;
+    private readonly StorageSettings _storageSettings;
 
-    public UploadItemImageCommandHandler(IApplicationDbContext db, IStorageService storage)
+    public UploadItemImageCommandHandler(
+        IApplicationDbContext db,
+        IStorageService storage,
+        IOptions<StorageSettings> storageSettings)
     {
         _db = db;
         _storage = storage;
+        _storageSettings = storageSettings.Value;
     }
 
     public async Task<string> Handle(UploadItemImageCommand cmd, CancellationToken ct)
@@ -23,11 +30,17 @@ public class UploadItemImageCommandHandler : IRequestHandler<UploadItemImageComm
         if (item.OwnerId != cmd.RequestingUserId)
             throw new UnauthorizedAccessException("Only the item owner can upload images.");
 
-        var uniqueFileName = $"items/{cmd.ItemId}/{Guid.NewGuid()}_{cmd.FileName}";
-        var url = await _storage.UploadFileAsync(cmd.FileStream, uniqueFileName, cmd.ContentType, ct);
+        var extension = Path.GetExtension(cmd.FileName);
+        var objectKey = $"items/{cmd.ItemId}/{Guid.NewGuid()}{extension}";
 
-        item.ImageUrls.Add(url);
-        item.UpdatedAtUtc = DateTime.UtcNow;
+        var url = await _storage.UploadAsync(
+            _storageSettings.ItemImagesBucket,
+            objectKey,
+            cmd.FileStream,
+            cmd.ContentType,
+            ct);
+
+        item.AddImageUrl(url);
         await _db.SaveChangesAsync(ct);
 
         return url;

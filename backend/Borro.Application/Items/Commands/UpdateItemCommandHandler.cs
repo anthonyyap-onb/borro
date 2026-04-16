@@ -1,6 +1,6 @@
+using Borro.Application.Common.Interfaces;
 using Borro.Application.Items.DTOs;
 using Borro.Domain.Entities;
-using Borro.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,22 +8,19 @@ namespace Borro.Application.Items.Commands;
 
 public sealed class UpdateItemCommandHandler : IRequestHandler<UpdateItemCommand, ItemDto?>
 {
-    private readonly BorroDbContext _context;
+    private readonly IApplicationDbContext _context;
 
-    public UpdateItemCommandHandler(BorroDbContext context)
-    {
-        _context = context;
-    }
+    public UpdateItemCommandHandler(IApplicationDbContext context) => _context = context;
 
     public async Task<ItemDto?> Handle(UpdateItemCommand request, CancellationToken cancellationToken)
     {
         var item = await _context.Items
+            .Include(i => i.Owner)
             .FirstOrDefaultAsync(i => i.Id == request.ItemId, cancellationToken);
 
         if (item is null)
             return null;
 
-        // Only the owner may update the item.
         if (item.OwnerId != request.RequestingUserId)
             throw new UnauthorizedAccessException($"User {request.RequestingUserId} does not own item {request.ItemId}.");
 

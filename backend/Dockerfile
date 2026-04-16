@@ -8,6 +8,7 @@ COPY Borro.Domain/Borro.Domain.csproj Borro.Domain/
 COPY Borro.Application/Borro.Application.csproj Borro.Application/
 COPY Borro.Infrastructure/Borro.Infrastructure.csproj Borro.Infrastructure/
 COPY Borro.Api/Borro.Api.csproj Borro.Api/
+COPY Borro.Tests/Borro.Tests.csproj Borro.Tests/
 
 RUN dotnet restore
 

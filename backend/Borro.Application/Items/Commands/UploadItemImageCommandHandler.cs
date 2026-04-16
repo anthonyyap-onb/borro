@@ -8,12 +8,12 @@ namespace Borro.Application.Items.Commands;
 
 public sealed class UploadItemImageCommandHandler : IRequestHandler<UploadItemImageCommand, string?>
 {
-    private readonly IBorroDbContext _context;
+    private readonly IApplicationDbContext _context;
     private readonly IStorageService _storage;
     private readonly StorageSettings _storageSettings;
 
     public UploadItemImageCommandHandler(
-        IBorroDbContext context,
+        IApplicationDbContext context,
         IStorageService storage,
         IOptions<StorageSettings> storageSettings)
     {

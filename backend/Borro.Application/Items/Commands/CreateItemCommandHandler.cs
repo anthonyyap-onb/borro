@@ -1,21 +1,23 @@
+using Borro.Application.Common.Interfaces;
 using Borro.Application.Items.DTOs;
 using Borro.Domain.Entities;
-using Borro.Infrastructure.Persistence;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Borro.Application.Items.Commands;
 
 public sealed class CreateItemCommandHandler : IRequestHandler<CreateItemCommand, ItemDto>
 {
-    private readonly BorroDbContext _context;
+    private readonly IApplicationDbContext _context;
 
-    public CreateItemCommandHandler(BorroDbContext context)
-    {
-        _context = context;
-    }
+    public CreateItemCommandHandler(IApplicationDbContext context) => _context = context;
 
     public async Task<ItemDto> Handle(CreateItemCommand request, CancellationToken cancellationToken)
     {
+        var owner = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == request.OwnerId, cancellationToken)
+            ?? throw new InvalidOperationException($"User {request.OwnerId} not found.");
+
         var item = Item.Create(
             request.OwnerId,
             request.Title,
@@ -41,6 +43,8 @@ public sealed class CreateItemCommandHandler : IRequestHandler<CreateItemCommand
                 Brand = request.Brand,
                 Condition = request.Condition
             });
+
+        item.Owner = owner;
 
         _context.Items.Add(item);
         await _context.SaveChangesAsync(cancellationToken);

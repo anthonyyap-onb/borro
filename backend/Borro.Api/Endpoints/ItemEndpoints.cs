@@ -1,8 +1,6 @@
-// backend/Borro.Api/Endpoints/ItemEndpoints.cs
-using Borro.Application.Items.Commands.CreateItem;
-using Borro.Application.Items.Commands.UploadItemImage;
-using Borro.Application.Items.Queries.GetItem;
-using Borro.Application.Items.Queries.SearchItems;
+using Borro.Application.Items.Commands;
+using Borro.Application.Items.Queries;
+using Borro.Domain.Enums;
 using MediatR;
 using System.Security.Claims;
 
@@ -14,35 +12,39 @@ public static class ItemEndpoints
     {
         var group = app.MapGroup("/api/items").WithTags("Items");
 
-        // GET /api/items/search?category=Tools&location=Portland&maxPrice=50
+        // GET /api/items/search
         group.MapGet("/search", async (
-            string? category, string? location, decimal? maxPrice,
-            IMediator mediator, CancellationToken ct) =>
+            string? searchText, string? location, string? category, decimal? minPrice, decimal? maxPrice,
+            DateTime? availableFrom, DateTime? availableTo,
+            int page = 1, int pageSize = 20,
+            IMediator mediator = null!, CancellationToken ct = default) =>
         {
-            var results = await mediator.Send(new SearchItemsQuery(category, location, maxPrice), ct);
+            Category? categoryEnum = null;
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                if (!Enum.TryParse<Category>(category, true, out var parsed))
+                    return Results.BadRequest(new { error = $"Invalid category '{category}'." });
+                categoryEnum = parsed;
+            }
+
+            var results = await mediator.Send(
+                new SearchItemsQuery(searchText, location, categoryEnum, minPrice, maxPrice,
+                    availableFrom, availableTo, null, null, null, null, null, null, page, pageSize), ct);
             return Results.Ok(results);
         });
 
         // GET /api/items/{id}
         group.MapGet("/{id:guid}", async (Guid id, IMediator mediator, CancellationToken ct) =>
         {
-            try
-            {
-                var item = await mediator.Send(new GetItemQuery(id), ct);
-                return Results.Ok(item);
-            }
-            catch (InvalidOperationException)
-            {
-                return Results.NotFound();
-            }
+            var item = await mediator.Send(new GetItemByIdQuery(id), ct);
+            return item is null ? Results.NotFound() : Results.Ok(item);
         });
 
-        // GET /api/items/{id}/availability  — returns blocked dates (Phase 3 will populate this)
+        // GET /api/items/{id}/availability
         group.MapGet("/{id:guid}/availability", async (Guid id, IMediator mediator, CancellationToken ct) =>
         {
-            // Stub: Phase 3 replaces this with real booked-date logic
-            await Task.CompletedTask;
-            return Results.Ok(Array.Empty<object>());
+            var dates = await mediator.Send(new GetItemAvailabilityQuery(id), ct);
+            return dates is null ? Results.NotFound() : Results.Ok(dates);
         });
 
         // POST /api/items  (requires auth)
@@ -53,18 +55,26 @@ public static class ItemEndpoints
             if (ownerIdClaim is null || !Guid.TryParse(ownerIdClaim, out var ownerId))
                 return Results.Unauthorized();
 
+            if (!Enum.TryParse<Category>(req.Category, true, out var category))
+                return Results.BadRequest(new { error = $"Invalid category '{req.Category}'." });
+
+            var handoverOptions = req.HandoverOptions
+                .Select(s => Enum.TryParse<HandoverOption>(s, true, out var v) ? (HandoverOption?)v : null)
+                .Where(v => v.HasValue)
+                .Select(v => v!.Value)
+                .ToList();
+
             try
             {
-                var result = await mediator.Send(
-                    new CreateItemCommand(
-                        ownerId, req.Title, req.Description, req.DailyPrice,
-                        req.Location, req.Category, req.Attributes,
-                        req.InstantBookEnabled, req.HandoverOptions), ct);
+                var result = await mediator.Send(new CreateItemCommand(
+                    ownerId, req.Title, req.Description, req.DailyPrice,
+                    req.Location, category, req.InstantBookEnabled, handoverOptions,
+                    req.Mileage, req.Transmission, req.Bedrooms, req.Megapixels, req.Brand, req.Condition), ct);
                 return Results.Created($"/api/items/{result.Id}", result);
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException ex)
             {
-                return Results.BadRequest(new { error = "Item could not be created." });
+                return Results.BadRequest(new { error = ex.Message });
             }
         }).RequireAuthorization();
 
@@ -99,9 +109,9 @@ public static class ItemEndpoints
                     new UploadItemImageCommand(itemId, userId, stream, file.FileName, file.ContentType), ct);
                 return Results.Ok(new { url });
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException ex)
             {
-                return Results.BadRequest(new { error = "Image could not be uploaded." });
+                return Results.BadRequest(new { error = ex.Message });
             }
             catch (UnauthorizedAccessException)
             {
@@ -118,8 +128,13 @@ public static class ItemEndpoints
         decimal DailyPrice,
         string Location,
         string Category,
-        Dictionary<string, object> Attributes,
         bool InstantBookEnabled,
-        List<string> HandoverOptions
+        List<string> HandoverOptions,
+        int? Mileage = null,
+        string? Transmission = null,
+        int? Bedrooms = null,
+        int? Megapixels = null,
+        string? Brand = null,
+        string? Condition = null
     );
 }

@@ -1,4 +1,4 @@
-using Borro.Application.Items.Commands.CreateItem;
+using Borro.Application.Items.Commands;
 using Borro.Domain.Entities;
 using Borro.Domain.Enums;
 using Borro.Infrastructure.Persistence;
@@ -40,10 +40,15 @@ public class CreateItemCommandHandlerTests
             Description: "Heavy-duty cordless drill",
             DailyPrice: 15m,
             Location: "Portland, OR",
-            Category: "Tools",
-            Attributes: new Dictionary<string, object> { ["Voltage"] = "20V" },
+            Category: Category.Tools,
             InstantBookEnabled: true,
-            HandoverOptions: new List<string> { "RenterPicksUp" }
+            HandoverOptions: new List<HandoverOption> { HandoverOption.LocalPickup },
+            Mileage: null,
+            Transmission: null,
+            Bedrooms: null,
+            Megapixels: null,
+            Brand: "DeWalt",
+            Condition: null
         );
 
         var result = await handler.Handle(cmd, CancellationToken.None);
@@ -66,10 +71,15 @@ public class CreateItemCommandHandlerTests
             Description: "DSLR",
             DailyPrice: 50m,
             Location: "NYC",
-            Category: "Electronics",
-            Attributes: new Dictionary<string, object>(),
+            Category: Category.Electronics,
             InstantBookEnabled: false,
-            HandoverOptions: new List<string>()
+            HandoverOptions: new List<HandoverOption>(),
+            Mileage: null,
+            Transmission: null,
+            Bedrooms: null,
+            Megapixels: null,
+            Brand: null,
+            Condition: null
         );
 
         await Assert.ThrowsAsync<InvalidOperationException>(

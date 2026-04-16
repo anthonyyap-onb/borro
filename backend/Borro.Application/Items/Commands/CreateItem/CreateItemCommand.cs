@@ -1,4 +1,5 @@
 using Borro.Application.Items.DTOs;
+using Borro.Domain.Enums;
 using MediatR;
 
 namespace Borro.Application.Items.Commands.CreateItem;
@@ -9,8 +10,13 @@ public record CreateItemCommand(
     string Description,
     decimal DailyPrice,
     string Location,
-    string Category,
-    Dictionary<string, object> Attributes,
+    Category Category,
     bool InstantBookEnabled,
-    List<string> HandoverOptions
+    List<HandoverOption> HandoverOptions,
+    int? Mileage,
+    string? Transmission,
+    int? Bedrooms,
+    int? Megapixels,
+    string? Brand,
+    string? Condition
 ) : IRequest<ItemDto>;

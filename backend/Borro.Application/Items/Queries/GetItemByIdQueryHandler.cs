@@ -1,5 +1,5 @@
+using Borro.Application.Common.Interfaces;
 using Borro.Application.Items.DTOs;
-using Borro.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,16 +7,14 @@ namespace Borro.Application.Items.Queries;
 
 public sealed class GetItemByIdQueryHandler : IRequestHandler<GetItemByIdQuery, ItemDto?>
 {
-    private readonly BorroDbContext _context;
+    private readonly IApplicationDbContext _context;
 
-    public GetItemByIdQueryHandler(BorroDbContext context)
-    {
-        _context = context;
-    }
+    public GetItemByIdQueryHandler(IApplicationDbContext context) => _context = context;
 
     public async Task<ItemDto?> Handle(GetItemByIdQuery request, CancellationToken cancellationToken)
     {
         var item = await _context.Items
+            .Include(i => i.Owner)
             .AsNoTracking()
             .FirstOrDefaultAsync(i => i.Id == request.ItemId, cancellationToken);
 

@@ -1,4 +1,4 @@
-using Borro.Infrastructure.Persistence;
+using Borro.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,12 +6,9 @@ namespace Borro.Application.Items.Commands;
 
 public sealed class RemoveBlockedDateCommandHandler : IRequestHandler<RemoveBlockedDateCommand, bool?>
 {
-    private readonly BorroDbContext _context;
+    private readonly IApplicationDbContext _context;
 
-    public RemoveBlockedDateCommandHandler(BorroDbContext context)
-    {
-        _context = context;
-    }
+    public RemoveBlockedDateCommandHandler(IApplicationDbContext context) => _context = context;
 
     public async Task<bool?> Handle(RemoveBlockedDateCommand request, CancellationToken cancellationToken)
     {

@@ -1,5 +1,6 @@
 using Borro.Application.Items.Queries.SearchItems;
 using Borro.Domain.Entities;
+using Borro.Domain.Enums;
 using Borro.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
@@ -13,7 +14,7 @@ public class SearchItemsQueryHandlerTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options);
 
-    private static (User owner, Item item) Seed(BorroDbContext ctx, string category, decimal price, string location)
+    private static (User owner, Item item) Seed(BorroDbContext ctx, Category category, decimal price, string location)
     {
         var owner = new User
         {
@@ -26,7 +27,7 @@ public class SearchItemsQueryHandlerTests
             Id = Guid.NewGuid(), OwnerId = owner.Id, Owner = owner,
             Title = "Test Item", Description = "desc", DailyPrice = price,
             Location = location, Category = category,
-            Attributes = new ItemAttributes { Values = new() },
+            Attributes = new ItemAttributes(),
             InstantBookEnabled = false, ImageUrls = new(),
             CreatedAtUtc = DateTime.UtcNow, UpdatedAtUtc = DateTime.UtcNow
         };
@@ -40,8 +41,8 @@ public class SearchItemsQueryHandlerTests
     public async Task Handle_NullFilters_ReturnsAllItems()
     {
         await using var ctx = CreateContext();
-        Seed(ctx, "Tools", 20m, "Portland");
-        Seed(ctx, "Vehicles", 80m, "Seattle");
+        Seed(ctx, Category.Tools, 20m, "Portland");
+        Seed(ctx, Category.Vehicle, 80m, "Seattle");
 
         var handler = new SearchItemsQueryHandler(ctx);
         var results = await handler.Handle(new SearchItemsQuery(null, null, null), CancellationToken.None);
@@ -53,22 +54,22 @@ public class SearchItemsQueryHandlerTests
     public async Task Handle_CategoryFilter_ReturnsOnlyMatchingItems()
     {
         await using var ctx = CreateContext();
-        Seed(ctx, "Tools", 20m, "Portland");
-        Seed(ctx, "Vehicles", 80m, "Seattle");
+        Seed(ctx, Category.Tools, 20m, "Portland");
+        Seed(ctx, Category.Vehicle, 80m, "Seattle");
 
         var handler = new SearchItemsQueryHandler(ctx);
-        var results = await handler.Handle(new SearchItemsQuery("Tools", null, null), CancellationToken.None);
+        var results = await handler.Handle(new SearchItemsQuery(Category.Tools, null, null), CancellationToken.None);
 
         Assert.Single(results);
-        Assert.Equal("Tools", results[0].Category);
+        Assert.Equal(Category.Tools, results[0].Category);
     }
 
     [Fact]
     public async Task Handle_MaxPriceFilter_ExcludesExpensiveItems()
     {
         await using var ctx = CreateContext();
-        Seed(ctx, "Tools", 20m, "Portland");
-        Seed(ctx, "Vehicles", 80m, "Seattle");
+        Seed(ctx, Category.Tools, 20m, "Portland");
+        Seed(ctx, Category.Vehicle, 80m, "Seattle");
 
         var handler = new SearchItemsQueryHandler(ctx);
         var results = await handler.Handle(new SearchItemsQuery(null, null, 50m), CancellationToken.None);
