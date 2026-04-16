@@ -62,9 +62,9 @@ public static class ItemEndpoints
                         req.InstantBookEnabled, req.HandoverOptions), ct);
                 return Results.Created($"/api/items/{result.Id}", result);
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                return Results.BadRequest(new { error = ex.Message });
+                return Results.BadRequest(new { error = "Item could not be created." });
             }
         }).RequireAuthorization();
 
@@ -84,6 +84,13 @@ public static class ItemEndpoints
             var file = request.Form.Files.FirstOrDefault();
             if (file is null)
                 return Results.BadRequest(new { error = "No file provided." });
+
+            string[] allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+            if (!allowedTypes.Contains(file.ContentType))
+                return Results.BadRequest(new { error = "Only JPEG, PNG, and WebP images are allowed." });
+
+            if (file.Length > 10 * 1024 * 1024)
+                return Results.BadRequest(new { error = "File size must not exceed 10 MB." });
 
             try
             {

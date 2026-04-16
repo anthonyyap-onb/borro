@@ -30,7 +30,9 @@ public class CreateItemCommandHandler : IRequestHandler<CreateItemCommand, ItemD
             Attributes = new ItemAttributes { Values = cmd.Attributes },
             InstantBookEnabled = cmd.InstantBookEnabled,
             HandoverOptions = cmd.HandoverOptions
-                .Select(Enum.Parse<HandoverOption>)
+                .Select(s => Enum.TryParse<HandoverOption>(s, out var v)
+                    ? v
+                    : throw new InvalidOperationException($"Invalid handover option: '{s}'."))
                 .ToList(),
             ImageUrls = new List<string>(),
             CreatedAtUtc = DateTime.UtcNow,
