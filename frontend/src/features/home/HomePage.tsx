@@ -1,7 +1,9 @@
 import { useAuth } from '../auth/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
 
 export function HomePage() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="bg-surface font-body text-on-surface">
@@ -12,7 +14,7 @@ export function HomePage() {
           <div className="flex items-center gap-12">
             <span className="text-2xl font-black text-primary font-headline tracking-tight">Borro</span>
             <div className="hidden md:flex items-center gap-8">
-              <a href="#" className="text-primary font-semibold border-b-2 border-primary transition-colors">List an Item</a>
+              <Link to="/items/new" className="text-primary font-semibold border-b-2 border-primary transition-colors">List an Item</Link>
               <a href="#" className="text-on-surface-variant font-medium hover:text-primary transition-colors">How it Works</a>
             </div>
           </div>
@@ -88,7 +90,10 @@ export function HomePage() {
                     </select>
                   </div>
                 </div>
-                <button className="w-full md:w-auto bg-primary text-on-primary rounded-full px-8 py-4 font-bold flex items-center justify-center gap-2 hover:bg-primary-container transition-all shadow-md active:scale-95 border-none">
+                <button
+                  onClick={() => navigate('/search')}
+                  className="w-full md:w-auto bg-primary text-on-primary rounded-full px-8 py-4 font-bold flex items-center justify-center gap-2 hover:bg-primary-container transition-all shadow-md active:scale-95 border-none"
+                >
                   <span className="material-symbols-outlined">search</span>
                   <span>Explore</span>
                 </button>
