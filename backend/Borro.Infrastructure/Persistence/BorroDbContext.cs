@@ -11,6 +11,7 @@ public class BorroDbContext : DbContext, IApplicationDbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<Wishlist> Wishlists => Set<Wishlist>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
