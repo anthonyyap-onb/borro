@@ -80,6 +80,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 // ── Middleware Pipeline ────────────────────────────────────────────────────────
+app.UseCors(CorsPolicyName);
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -87,7 +89,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUi(); // serves /swagger
 }
 
-app.UseCors(CorsPolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
 
