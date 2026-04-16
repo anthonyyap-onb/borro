@@ -15,6 +15,14 @@
 ### Coding Standards
 * Use latest versions of libraries and idiomatic approaches as of today.
 * Keep it simple. NEVER over-engineer, ALWAYS simplify. No extra features, focus on simplicity.
+* Make the error handling detailed and precise. Use defensive programming
+* Prioritize code quality over development speed
+* Maintainability and scalability are priorities
+* SOLID principles
+* Separation of Concerns
+* DRY (Don’t Repeat Yourself)
+* KISS (Keep It Simple)
+* Scalability and testability
 
 ---
 
