@@ -29,8 +29,10 @@ namespace Borro.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Category")
-                        .HasColumnType("integer");
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
@@ -43,9 +45,11 @@ namespace Borro.Infrastructure.Persistence.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
-                    b.PrimitiveCollection<int[]>("HandoverOptions")
+                    b.Property<string>("HandoverOptionsRaw")
                         .IsRequired()
-                        .HasColumnType("integer[]");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("handover_options");
 
                     b.PrimitiveCollection<List<string>>("ImageUrls")
                         .IsRequired()
@@ -56,8 +60,8 @@ namespace Borro.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Location")
                         .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid");
@@ -72,29 +76,9 @@ namespace Borro.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OwnerId");
+
                     b.ToTable("Items");
-                });
-
-            modelBuilder.Entity("Borro.Domain.Entities.ItemBlockedDate", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DateUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("ItemId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ItemId", "DateUtc");
-
-                    b.ToTable("ItemBlockedDates");
                 });
 
             modelBuilder.Entity("Borro.Domain.Entities.User", b =>
@@ -121,6 +105,10 @@ namespace Borro.Infrastructure.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -134,52 +122,37 @@ namespace Borro.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Borro.Domain.Entities.Wishlist", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ItemId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("ItemId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
+                    b.HasKey("UserId", "ItemId");
 
                     b.HasIndex("ItemId");
-
-                    b.HasIndex("UserId", "ItemId")
-                        .IsUnique();
 
                     b.ToTable("Wishlists");
                 });
 
             modelBuilder.Entity("Borro.Domain.Entities.Item", b =>
                 {
+                    b.HasOne("Borro.Domain.Entities.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.OwnsOne("Borro.Domain.Entities.ItemAttributes", "Attributes", b1 =>
                         {
                             b1.Property<Guid>("ItemId")
                                 .HasColumnType("uuid");
 
-                            b1.Property<int?>("Bedrooms")
-                                .HasColumnType("integer");
-
-                            b1.Property<string>("Brand")
-                                .HasColumnType("text");
-
-                            b1.Property<string>("Condition")
-                                .HasColumnType("text");
-
-                            b1.Property<int?>("Megapixels")
-                                .HasColumnType("integer");
-
-                            b1.Property<int?>("Mileage")
-                                .HasColumnType("integer");
-
-                            b1.Property<string>("Transmission")
+                            b1.Property<string>("Values")
+                                .IsRequired()
                                 .HasColumnType("text");
 
                             b1.HasKey("ItemId");
@@ -194,17 +167,8 @@ namespace Borro.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Attributes")
                         .IsRequired();
-                });
 
-            modelBuilder.Entity("Borro.Domain.Entities.ItemBlockedDate", b =>
-                {
-                    b.HasOne("Borro.Domain.Entities.Item", "Item")
-                        .WithMany("BlockedDates")
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Item");
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("Borro.Domain.Entities.Wishlist", b =>
@@ -224,11 +188,6 @@ namespace Borro.Infrastructure.Persistence.Migrations
                     b.Navigation("Item");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Borro.Domain.Entities.Item", b =>
-                {
-                    b.Navigation("BlockedDates");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,411 +1,125 @@
-using Borro.Api.Extensions;
-using Borro.Application.Items.Commands;
-using Borro.Application.Items.DTOs;
-using Borro.Application.Items.Queries;
-using Borro.Domain.Enums;
-using FluentValidation;
+// backend/Borro.Api/Endpoints/ItemEndpoints.cs
+using Borro.Application.Items.Commands.CreateItem;
+using Borro.Application.Items.Commands.UploadItemImage;
+using Borro.Application.Items.Queries.GetItem;
+using Borro.Application.Items.Queries.SearchItems;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Borro.Api.Endpoints;
 
-/// <summary>
-/// Item management endpoints.
-///
-/// Auth note: JWT authentication is not yet wired up (Phase 1 auth integration is pending).
-/// Endpoints that mutate owner-scoped resources accept a requestingUserId query parameter as
-/// a temporary stand-in. When Phase 1 auth middleware is added, replace this with
-/// HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) and call .RequireAuthorization().
-/// </summary>
 public static class ItemEndpoints
 {
     public static IEndpointRouteBuilder MapItemEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/items").WithTags("Items");
 
-        // ── CRUD ──────────────────────────────────────────────────────────────────
-        group.MapPost("", CreateItem)
-            .WithName("CreateItem")
-            .Produces<ItemDto>(StatusCodes.Status201Created)
-            .Produces<ValidationProblemDetails>(StatusCodes.Status400BadRequest);
+        // GET /api/items/search?category=Tools&location=Portland&maxPrice=50
+        group.MapGet("/search", async (
+            string? category, string? location, decimal? maxPrice,
+            IMediator mediator, CancellationToken ct) =>
+        {
+            var results = await mediator.Send(new SearchItemsQuery(category, location, maxPrice), ct);
+            return Results.Ok(results);
+        });
 
-        group.MapGet("{id:guid}", GetItemById)
-            .WithName("GetItemById")
-            .Produces<ItemDto>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound);
+        // GET /api/items/{id}
+        group.MapGet("/{id:guid}", async (Guid id, IMediator mediator, CancellationToken ct) =>
+        {
+            try
+            {
+                var item = await mediator.Send(new GetItemQuery(id), ct);
+                return Results.Ok(item);
+            }
+            catch (InvalidOperationException)
+            {
+                return Results.NotFound();
+            }
+        });
 
-        group.MapPut("{id:guid}", UpdateItem)
-            .WithName("UpdateItem")
-            .Produces<ItemDto>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status403Forbidden)
-            .Produces<ValidationProblemDetails>(StatusCodes.Status400BadRequest);
+        // GET /api/items/{id}/availability  — returns blocked dates (Phase 3 will populate this)
+        group.MapGet("/{id:guid}/availability", async (Guid id, IMediator mediator, CancellationToken ct) =>
+        {
+            // Stub: Phase 3 replaces this with real booked-date logic
+            await Task.CompletedTask;
+            return Results.Ok(Array.Empty<object>());
+        });
 
-        group.MapDelete("{id:guid}", DeleteItem)
-            .WithName("DeleteItem")
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status403Forbidden);
+        // POST /api/items  (requires auth)
+        group.MapPost("/", async (CreateItemRequest req, ClaimsPrincipal user, IMediator mediator, CancellationToken ct) =>
+        {
+            var ownerIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? user.FindFirstValue("sub");
+            if (ownerIdClaim is null || !Guid.TryParse(ownerIdClaim, out var ownerId))
+                return Results.Unauthorized();
 
-        // ── Search ────────────────────────────────────────────────────────────────
-        group.MapGet("search", SearchItems)
-            .WithName("SearchItems")
-            .Produces<SearchItemsResult>(StatusCodes.Status200OK)
-            .Produces<ValidationProblemDetails>(StatusCodes.Status400BadRequest);
+            try
+            {
+                var result = await mediator.Send(
+                    new CreateItemCommand(
+                        ownerId, req.Title, req.Description, req.DailyPrice,
+                        req.Location, req.Category, req.Attributes,
+                        req.InstantBookEnabled, req.HandoverOptions), ct);
+                return Results.Created($"/api/items/{result.Id}", result);
+            }
+            catch (InvalidOperationException)
+            {
+                return Results.BadRequest(new { error = "Item could not be created." });
+            }
+        }).RequireAuthorization();
 
-        // ── Availability ──────────────────────────────────────────────────────────
-        group.MapGet("{id:guid}/availability", GetAvailability)
-            .WithName("GetItemAvailability")
-            .Produces<List<DateTime>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound);
+        // POST /api/items/images  (requires auth, multipart/form-data)
+        group.MapPost("/images", async (
+            HttpRequest request, ClaimsPrincipal user, IMediator mediator, CancellationToken ct) =>
+        {
+            var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? user.FindFirstValue("sub");
+            if (userIdClaim is null || !Guid.TryParse(userIdClaim, out var userId))
+                return Results.Unauthorized();
 
-        // ── Blocked dates ─────────────────────────────────────────────────────────
-        group.MapPost("{id:guid}/blocked-dates", AddBlockedDate)
-            .WithName("AddBlockedDate")
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status403Forbidden);
+            if (!request.Form.TryGetValue("itemId", out var itemIdStr)
+                || !Guid.TryParse(itemIdStr, out var itemId))
+                return Results.BadRequest(new { error = "itemId is required." });
 
-        group.MapDelete("{id:guid}/blocked-dates", RemoveBlockedDate)
-            .WithName("RemoveBlockedDate")
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status403Forbidden);
+            var file = request.Form.Files.FirstOrDefault();
+            if (file is null)
+                return Results.BadRequest(new { error = "No file provided." });
 
-        // ── Image upload ──────────────────────────────────────────────────────────
-        group.MapPost("images", UploadImage)
-            .WithName("UploadItemImage")
-            .DisableAntiforgery()
-            .Produces<UploadImageResponse>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status403Forbidden)
-            .Produces<ValidationProblemDetails>(StatusCodes.Status400BadRequest);
+            string[] allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+            if (!allowedTypes.Contains(file.ContentType))
+                return Results.BadRequest(new { error = "Only JPEG, PNG, and WebP images are allowed." });
 
-        // ── Wishlist ──────────────────────────────────────────────────────────────
-        group.MapPost("{id:guid}/wishlist", AddToWishlist)
-            .WithName("AddToWishlist")
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status409Conflict)
-            .Produces(StatusCodes.Status404NotFound);
+            if (file.Length > 10 * 1024 * 1024)
+                return Results.BadRequest(new { error = "File size must not exceed 10 MB." });
 
-        group.MapDelete("{id:guid}/wishlist", RemoveFromWishlist)
-            .WithName("RemoveFromWishlist")
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status404NotFound);
+            try
+            {
+                await using var stream = file.OpenReadStream();
+                var url = await mediator.Send(
+                    new UploadItemImageCommand(itemId, userId, stream, file.FileName, file.ContentType), ct);
+                return Results.Ok(new { url });
+            }
+            catch (InvalidOperationException)
+            {
+                return Results.BadRequest(new { error = "Image could not be uploaded." });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Results.Forbid();
+            }
+        }).RequireAuthorization();
 
         return app;
     }
 
-    // ── Handlers ─────────────────────────────────────────────────────────────────
-
-    private static async Task<IResult> CreateItem(
-        [FromBody] CreateItemRequest body,
-        IMediator mediator,
-        CancellationToken ct)
-    {
-        var command = new CreateItemCommand(
-            body.OwnerId,
-            body.Title,
-            body.Description ?? string.Empty,
-            body.DailyPrice,
-            body.Location,
-            body.Category,
-            body.InstantBookEnabled,
-            body.HandoverOptions ?? new List<HandoverOption>(),
-            body.Mileage,
-            body.Transmission,
-            body.Bedrooms,
-            body.Megapixels,
-            body.Brand,
-            body.Condition);
-
-        try
-        {
-            var result = await mediator.Send(command, ct);
-            return Results.Created($"/api/items/{result.Id}", result);
-        }
-        catch (ValidationException ex)
-        {
-            return Results.ValidationProblem(ex.ToErrorDictionary());
-        }
-    }
-
-    private static async Task<IResult> GetItemById(Guid id, IMediator mediator, CancellationToken ct)
-    {
-        var result = await mediator.Send(new GetItemByIdQuery(id), ct);
-        return result is null ? Results.NotFound() : Results.Ok(result);
-    }
-
-    private static async Task<IResult> UpdateItem(
-        Guid id,
-        [FromBody] UpdateItemRequest body,
-        IMediator mediator,
-        CancellationToken ct)
-    {
-        var command = new UpdateItemCommand(
-            id,
-            body.RequestingUserId,
-            body.Title,
-            body.Description ?? string.Empty,
-            body.DailyPrice,
-            body.Location,
-            body.Category,
-            body.InstantBookEnabled,
-            body.HandoverOptions ?? new List<HandoverOption>(),
-            body.Mileage,
-            body.Transmission,
-            body.Bedrooms,
-            body.Megapixels,
-            body.Brand,
-            body.Condition);
-
-        try
-        {
-            var result = await mediator.Send(command, ct);
-            if (result is null) return Results.NotFound();
-            return Results.Ok(result);
-        }
-        catch (ValidationException ex)
-        {
-            return Results.ValidationProblem(ex.ToErrorDictionary());
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return Results.Forbid();
-        }
-    }
-
-    private static async Task<IResult> DeleteItem(
-        Guid id,
-        [FromQuery] Guid requestingUserId,
-        IMediator mediator,
-        CancellationToken ct)
-    {
-        try
-        {
-            var deleted = await mediator.Send(new DeleteItemCommand(id, requestingUserId), ct);
-            return deleted ? Results.NoContent() : Results.NotFound();
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return Results.Forbid();
-        }
-    }
-
-    private static async Task<IResult> SearchItems(
-        IMediator mediator,
-        CancellationToken ct,
-        [FromQuery] string? searchText = null,
-        [FromQuery] string? location = null,
-        [FromQuery] Category? category = null,
-        [FromQuery] decimal? minPrice = null,
-        [FromQuery] decimal? maxPrice = null,
-        [FromQuery] DateTime? availableFrom = null,
-        [FromQuery] DateTime? availableTo = null,
-        [FromQuery] string? handoverOptions = null,
-        [FromQuery] int? maxMileage = null,
-        [FromQuery] string? transmission = null,
-        [FromQuery] int? minBedrooms = null,
-        [FromQuery] string? brand = null,
-        [FromQuery] string? condition = null,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20)
-    {
-        // Parse comma-separated handover options (e.g. "0,1")
-        List<HandoverOption>? parsedHandoverOptions = null;
-        if (!string.IsNullOrWhiteSpace(handoverOptions))
-        {
-            parsedHandoverOptions = handoverOptions
-                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .Select(s => int.TryParse(s, out var v) ? (HandoverOption?)v : null)
-                .Where(v => v.HasValue)
-                .Select(v => v!.Value)
-                .ToList();
-        }
-
-        var query = new SearchItemsQuery(
-            searchText,
-            location,
-            category,
-            minPrice,
-            maxPrice,
-            availableFrom.HasValue ? DateTime.SpecifyKind(availableFrom.Value, DateTimeKind.Utc) : null,
-            availableTo.HasValue ? DateTime.SpecifyKind(availableTo.Value, DateTimeKind.Utc) : null,
-            parsedHandoverOptions,
-            maxMileage,
-            transmission,
-            minBedrooms,
-            brand,
-            condition,
-            page,
-            pageSize);
-
-        try
-        {
-            var result = await mediator.Send(query, ct);
-            return Results.Ok(result);
-        }
-        catch (ValidationException ex)
-        {
-            return Results.ValidationProblem(ex.ToErrorDictionary());
-        }
-    }
-
-    private static async Task<IResult> GetAvailability(Guid id, IMediator mediator, CancellationToken ct)
-    {
-        var result = await mediator.Send(new GetItemAvailabilityQuery(id), ct);
-        return result is null ? Results.NotFound() : Results.Ok(result);
-    }
-
-    private static async Task<IResult> AddBlockedDate(
-        Guid id,
-        [FromBody] BlockedDateRequest body,
-        IMediator mediator,
-        CancellationToken ct)
-    {
-        try
-        {
-            var result = await mediator.Send(
-                new AddBlockedDateCommand(id, body.RequestingUserId, body.DateUtc), ct);
-
-            if (result is null) return Results.NotFound();
-            return Results.Ok();
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return Results.Forbid();
-        }
-    }
-
-    private static async Task<IResult> RemoveBlockedDate(
-        Guid id,
-        [FromBody] BlockedDateRequest body,
-        IMediator mediator,
-        CancellationToken ct)
-    {
-        try
-        {
-            var result = await mediator.Send(
-                new RemoveBlockedDateCommand(id, body.RequestingUserId, body.DateUtc), ct);
-
-            if (result is null) return Results.NotFound();
-            if (result == false) return Results.NotFound();
-            return Results.NoContent();
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return Results.Forbid();
-        }
-    }
-
-    private static async Task<IResult> UploadImage(
-        [FromForm] IFormFile file,
-        [FromForm] Guid itemId,
-        [FromForm] Guid requestingUserId,
-        IMediator mediator,
-        CancellationToken ct)
-    {
-        if (file.Length == 0)
-            return Results.ValidationProblem(new Dictionary<string, string[]>
-            {
-                ["file"] = ["File must not be empty."]
-            });
-
-        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp", "image/gif" };
-        if (!allowedTypes.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase))
-            return Results.ValidationProblem(new Dictionary<string, string[]>
-            {
-                ["file"] = [$"Unsupported content type '{file.ContentType}'. Allowed: jpeg, png, webp, gif."]
-            });
-
-        using var stream = file.OpenReadStream();
-        try
-        {
-            var url = await mediator.Send(
-                new UploadItemImageCommand(itemId, requestingUserId, stream, file.FileName, file.ContentType), ct);
-
-            if (url is null) return Results.NotFound();
-            return Results.Ok(new UploadImageResponse(url));
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return Results.Forbid();
-        }
-    }
-
-    private static async Task<IResult> AddToWishlist(
-        Guid id,
-        [FromBody] WishlistRequest body,
-        IMediator mediator,
-        CancellationToken ct)
-    {
-        var result = await mediator.Send(new AddToWishlistCommand(body.UserId, id), ct);
-
-        return result switch
-        {
-            null => Results.NotFound(),
-            false => Results.Conflict("Item is already in wishlist."),
-            true => Results.Ok()
-        };
-    }
-
-    private static async Task<IResult> RemoveFromWishlist(
-        Guid id,
-        [FromBody] WishlistRequest body,
-        IMediator mediator,
-        CancellationToken ct)
-    {
-        var result = await mediator.Send(new RemoveFromWishlistCommand(body.UserId, id), ct);
-
-        return result switch
-        {
-            null => Results.NotFound(),
-            false => Results.NotFound(),
-            true => Results.NoContent()
-        };
-    }
+    private record CreateItemRequest(
+        string Title,
+        string Description,
+        decimal DailyPrice,
+        string Location,
+        string Category,
+        Dictionary<string, object> Attributes,
+        bool InstantBookEnabled,
+        List<string> HandoverOptions
+    );
 }
-
-// ── Request models ────────────────────────────────────────────────────────────
-
-/// <summary>Request body for POST /api/items.</summary>
-public sealed record CreateItemRequest(
-    Guid OwnerId,
-    string Title,
-    string? Description,
-    decimal DailyPrice,
-    string Location,
-    Category Category,
-    bool InstantBookEnabled,
-    List<HandoverOption>? HandoverOptions,
-    int? Mileage,
-    string? Transmission,
-    int? Bedrooms,
-    int? Megapixels,
-    string? Brand,
-    string? Condition
-);
-
-/// <summary>Request body for PUT /api/items/{id}.</summary>
-public sealed record UpdateItemRequest(
-    Guid RequestingUserId,
-    string Title,
-    string? Description,
-    decimal DailyPrice,
-    string Location,
-    Category Category,
-    bool InstantBookEnabled,
-    List<HandoverOption>? HandoverOptions,
-    int? Mileage,
-    string? Transmission,
-    int? Bedrooms,
-    int? Megapixels,
-    string? Brand,
-    string? Condition
-);
-
-public sealed record BlockedDateRequest(Guid RequestingUserId, DateTime DateUtc);
-
-public sealed record WishlistRequest(Guid UserId);
-
-public sealed record UploadImageResponse(string Url);

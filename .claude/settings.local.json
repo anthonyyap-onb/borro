@@ -9,7 +9,13 @@
       "Bash(dotnet ef *)",
       "Bash(dotnet tool *)",
       "Bash(claude mcp *)",
-      "Bash(dotnet add *)"
+      "Bash(dotnet add *)",
+      "Bash(npm install *)",
+      "mcp__stitch__list_projects",
+      "mcp__stitch__list_design_systems",
+      "mcp__stitch__list_screens",
+      "mcp__stitch__get_screen",
+      "WebFetch(domain:contribution.usercontent.google.com)"
     ]
   }
 }

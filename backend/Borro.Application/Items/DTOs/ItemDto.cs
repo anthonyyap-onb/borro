@@ -6,6 +6,7 @@ namespace Borro.Application.Items.DTOs;
 public sealed record ItemDto(
     Guid Id,
     Guid OwnerId,
+    string OwnerName,
     string Title,
     string Description,
     decimal DailyPrice,
