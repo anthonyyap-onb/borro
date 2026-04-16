@@ -11,6 +11,20 @@ var builder = WebApplication.CreateBuilder(args);
 // ── Core Services ──────────────────────────────────────────────────────────────
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddOpenApi();
+builder.Services.AddOpenApiDocument(config =>
+{
+    config.Title = "Borro API";
+    config.Version = "v1";
+    config.AddSecurity("Bearer", new NSwag.OpenApiSecurityScheme
+    {
+        Type = NSwag.OpenApiSecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "Enter your JWT token."
+    });
+    config.OperationProcessors.Add(
+        new NSwag.Generation.Processors.Security.OperationSecurityScopeProcessor("Bearer"));
+});
 
 // ── Clean Architecture Layers ──────────────────────────────────────────────────
 builder.Services.AddApplication();
@@ -69,6 +83,8 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseOpenApi();    // serves /swagger/v1/swagger.json
+    app.UseSwaggerUi(); // serves /swagger
 }
 
 app.UseCors(CorsPolicyName);
