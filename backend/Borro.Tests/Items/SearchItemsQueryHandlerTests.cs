@@ -23,11 +23,11 @@ public class SearchItemsQueryHandlerTests
         };
         var item = new Item
         {
-            Id = Guid.NewGuid(), OwnerId = owner.Id, Owner = owner,
+            Id = Guid.NewGuid(), LenderId = owner.Id, Lender = owner,
             Title = "Test Item", Description = "desc", DailyPrice = price,
             Location = location, Category = category,
             Attributes = new ItemAttributes { Values = new() },
-            InstantBookEnabled = false, ImageUrls = new(),
+            InstantBookEnabled = false, ImageUrls = [],
             CreatedAtUtc = DateTime.UtcNow, UpdatedAtUtc = DateTime.UtcNow
         };
         ctx.Users.Add(owner);

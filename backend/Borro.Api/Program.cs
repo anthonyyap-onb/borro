@@ -1,7 +1,9 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Borro.Api.Endpoints;
 using Borro.Application;
 using Borro.Infrastructure;
+using Borro.Infrastructure.Hubs;
 using Borro.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -10,6 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ── Core Services ──────────────────────────────────────────────────────────────
 builder.Services.AddSingleton(TimeProvider.System);
+
+// Serialize enums as strings (e.g. BookingStatus as "PendingApproval" not 0)
+builder.Services.ConfigureHttpJsonOptions(opts =>
+    opts.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
 builder.Services.AddOpenApi();
 builder.Services.AddOpenApiDocument(config =>
 {
@@ -48,9 +55,23 @@ builder.Services
             ValidAudience = builder.Configuration["Jwt:Audience"] ?? "borro-frontend",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         };
+        // SignalR WebSocket connections cannot send Authorization headers,
+        // so the JWT is passed as a query param ?access_token=...
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                var token = ctx.Request.Query["access_token"];
+                var path = ctx.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(token) && path.StartsWithSegments("/hubs"))
+                    ctx.Token = token;
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddSignalR();
 
 // ── CORS ───────────────────────────────────────────────────────────────────────
 const string CorsPolicyName = "BorroFrontend";
@@ -62,7 +83,8 @@ builder.Services.AddCors(options =>
             .WithOrigins(
                 "http://localhost:5173",   // Vite dev server (local)
                 "http://frontend:5173",    // Docker service name
-                "http://localhost:3000"    // fallback
+                "http://localhost:3000",    // fallback
+                "https://c903-2001-4456-c91-2600-7950-b97b-d475-9cdb.ngrok-free.app" //ngrok
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
@@ -97,5 +119,7 @@ app.MapHealthEndpoints();
 app.MapAuthEndpoints();
 app.MapItemEndpoints();
 app.MapBlockedDatesEndpoints();
+app.MapBookingEndpoints();
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();

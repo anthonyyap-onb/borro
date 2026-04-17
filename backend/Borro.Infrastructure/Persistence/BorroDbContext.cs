@@ -13,6 +13,8 @@ public class BorroDbContext : DbContext, IApplicationDbContext
     public DbSet<Item> Items => Set<Item>();
     public DbSet<Wishlist> Wishlists => Set<Wishlist>();
     public DbSet<BlockedDate> BlockedDates => Set<BlockedDate>();
+    public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<Message> Messages => Set<Message>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -89,6 +91,39 @@ public class BorroDbContext : DbContext, IApplicationDbContext
                   .HasForeignKey(b => b.ItemId)
                   .OnDelete(DeleteBehavior.Cascade);
             entity.HasIndex(b => new { b.ItemId, b.Date }).IsUnique();
+        });
+
+        modelBuilder.Entity<Booking>(entity =>
+        {
+            entity.HasKey(b => b.Id);
+            entity.Property(b => b.TotalPrice).HasColumnType("numeric(18,2)");
+            entity.Property(b => b.Status).HasConversion<string>();
+
+            entity.HasOne(b => b.Item)
+                  .WithMany()
+                  .HasForeignKey(b => b.ItemId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(b => b.Renter)
+                  .WithMany()
+                  .HasForeignKey(b => b.RenterId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Message>(entity =>
+        {
+            entity.HasKey(m => m.Id);
+            entity.Property(m => m.Content).IsRequired().HasMaxLength(2000);
+
+            entity.HasOne(m => m.Booking)
+                  .WithMany(b => b.Messages)
+                  .HasForeignKey(m => m.BookingId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(m => m.Sender)
+                  .WithMany()
+                  .HasForeignKey(m => m.SenderId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

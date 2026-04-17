@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8080',
+  // Use a relative base so requests go to the same origin.
+  // Vite's dev-server proxy (vite.config.ts) forwards /api → backend.
+  baseURL: '',
 });
 
 apiClient.interceptors.request.use((config) => {

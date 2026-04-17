@@ -14,7 +14,10 @@ public class TestDbContext : DbContext, IApplicationDbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<Wishlist> Wishlists => Set<Wishlist>();
     public DbSet<BlockedDate> BlockedDates => Set<BlockedDate>();
+    public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<Message> Messages => Set<Message>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -54,6 +57,28 @@ public class TestDbContext : DbContext, IApplicationDbContext
                   .HasForeignKey(b => b.ItemId)
                   .OnDelete(DeleteBehavior.Cascade);
             entity.HasIndex(b => new { b.ItemId, b.Date }).IsUnique();
+        });
+
+        modelBuilder.Entity<Wishlist>(entity =>
+        {
+            entity.HasKey(w => new { w.UserId, w.ItemId });
+            entity.HasOne(w => w.User).WithMany().HasForeignKey(w => w.UserId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(w => w.Item).WithMany().HasForeignKey(w => w.ItemId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Booking>(entity =>
+        {
+            entity.HasKey(b => b.Id);
+            entity.HasOne(b => b.Item).WithMany().HasForeignKey(b => b.ItemId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(b => b.Renter).WithMany().HasForeignKey(b => b.RenterId).OnDelete(DeleteBehavior.Restrict);
+            entity.Property(b => b.TotalPrice).HasColumnType("decimal(18,2)");
+        });
+
+        modelBuilder.Entity<Message>(entity =>
+        {
+            entity.HasKey(m => m.Id);
+            entity.HasOne(m => m.Booking).WithMany(b => b.Messages).HasForeignKey(m => m.BookingId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(m => m.Sender).WithMany().HasForeignKey(m => m.SenderId).OnDelete(DeleteBehavior.Restrict);
         });
     }
 }
