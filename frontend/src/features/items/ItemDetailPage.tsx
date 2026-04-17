@@ -1,8 +1,9 @@
 // frontend/src/features/items/ItemDetailPage.tsx
 import { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { itemApi, type ItemDto } from './itemApi';
 import { bookingApi } from '../bookings/bookingApi';
+import { Navbar } from '../../components/Navbar';
 
 export function ItemDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -40,23 +41,15 @@ export function ItemDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#f9f9f9] font-[Manrope]">
-      {/* Nav */}
-      <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-md shadow-[0_2px_12px_rgba(26,28,28,0.06)]">
-        <div className="max-w-screen-xl mx-auto px-8 h-16 flex items-center gap-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-1 text-[#3e494b] bg-transparent border-none cursor-pointer hover:text-[#005f6c] transition-colors text-sm font-semibold"
-          >
-            <span className="material-symbols-outlined text-base">arrow_back</span> Back
-          </button>
-          <span className="font-[Plus_Jakarta_Sans] font-black text-xl text-[#005f6c] ml-2">Borro</span>
-          <div className="flex gap-4 ml-auto text-sm font-semibold">
-            <Link to="/items/new" className="text-[#1a1c1c] no-underline">List an Item</Link>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-screen-xl mx-auto px-8 py-8">
+      <Navbar />
+      <div className="max-w-screen-xl mx-auto px-8 pt-24 pb-8">
+        {/* Back button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1 text-[#3e494b] bg-transparent border-none cursor-pointer hover:text-[#005f6c] transition-colors text-sm font-semibold mb-4"
+        >
+          <span className="material-symbols-outlined text-base">arrow_back</span> Back
+        </button>
         {/* Full-width photo gallery */}
         <div className="relative mb-8">
           <div className="aspect-[16/7] rounded-2xl overflow-hidden bg-[#e8e8e8]">
