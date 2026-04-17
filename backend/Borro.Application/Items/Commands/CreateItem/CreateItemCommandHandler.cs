@@ -9,55 +9,48 @@ namespace Borro.Application.Items.Commands.CreateItem;
 
 public class CreateItemCommandHandler : IRequestHandler<CreateItemCommand, ItemDto>
 {
-    private readonly IApplicationDbContext _db;
+    private readonly IApplicationDbContext _context;
+    private readonly TimeProvider _timeProvider;
 
-    public CreateItemCommandHandler(IApplicationDbContext db) => _db = db;
-
-    public async Task<ItemDto> Handle(CreateItemCommand cmd, CancellationToken ct)
+    public CreateItemCommandHandler(IApplicationDbContext context, TimeProvider timeProvider)
     {
-        var owner = await _db.Users.FirstOrDefaultAsync(u => u.Id == cmd.OwnerId, ct)
-            ?? throw new InvalidOperationException($"User {cmd.OwnerId} not found.");
+        _context = context;
+        _timeProvider = timeProvider;
+    }
+
+    public async Task<ItemDto> Handle(CreateItemCommand request, CancellationToken cancellationToken)
+    {
+        var lender = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == request.LenderId, cancellationToken)
+            ?? throw new InvalidOperationException($"User '{request.LenderId}' not found.");
+
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
 
         var item = new Item
         {
             Id = Guid.NewGuid(),
-            OwnerId = cmd.OwnerId,
-            Title = cmd.Title,
-            Description = cmd.Description,
-            DailyPrice = cmd.DailyPrice,
-            Location = cmd.Location,
-            Category = cmd.Category,
-            Attributes = new ItemAttributes { Values = cmd.Attributes },
-            InstantBookEnabled = cmd.InstantBookEnabled,
-            HandoverOptions = cmd.HandoverOptions
+            LenderId = request.LenderId,
+            Title = request.Title.Trim(),
+            Description = request.Description.Trim(),
+            DailyPrice = request.DailyPrice,
+            Location = request.Location.Trim(),
+            Category = request.Category.Trim(),
+            Attributes = new ItemAttributes { Values = request.Attributes },
+            InstantBookEnabled = request.InstantBookEnabled,
+            DeliveryAvailable = request.DeliveryAvailable,
+            HandoverOptions = request.HandoverOptions
                 .Select(s => Enum.TryParse<HandoverOption>(s, out var v)
                     ? v
                     : throw new InvalidOperationException($"Invalid handover option: '{s}'."))
                 .ToList(),
-            ImageUrls = new List<string>(),
-            CreatedAtUtc = DateTime.UtcNow,
-            UpdatedAtUtc = DateTime.UtcNow
+            ImageUrls = [],
+            CreatedAtUtc = now,
+            UpdatedAtUtc = now,
         };
 
-        _db.Items.Add(item);
-        await _db.SaveChangesAsync(ct);
+        _context.Items.Add(item);
+        await _context.SaveChangesAsync(cancellationToken);
 
-        return ToDto(item, owner);
+        return item.ToDto(lender);
     }
-
-    internal static ItemDto ToDto(Item item, User owner) => new(
-        Id: item.Id,
-        OwnerId: item.OwnerId,
-        OwnerName: $"{owner.FirstName} {owner.LastName}",
-        Title: item.Title,
-        Description: item.Description,
-        DailyPrice: item.DailyPrice,
-        Location: item.Location,
-        Category: item.Category,
-        Attributes: item.Attributes.Values,
-        InstantBookEnabled: item.InstantBookEnabled,
-        HandoverOptions: item.HandoverOptions.Select(h => h.ToString()).ToList(),
-        ImageUrls: item.ImageUrls,
-        CreatedAtUtc: item.CreatedAtUtc
-    );
 }

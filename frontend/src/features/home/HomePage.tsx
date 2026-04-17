@@ -14,7 +14,7 @@ export function HomePage() {
           <div className="flex items-center gap-12">
             <span className="text-2xl font-black text-primary font-headline tracking-tight">Borro</span>
             <div className="hidden md:flex items-center gap-8">
-              <Link to="/items/new" className="text-primary font-semibold border-b-2 border-primary transition-colors">List an Item</Link>
+              <a href="#" className="text-primary font-semibold border-b-2 border-primary transition-colors">Home</a>
               <a href="#" className="text-on-surface-variant font-medium hover:text-primary transition-colors">How it Works</a>
             </div>
           </div>
@@ -28,6 +28,13 @@ export function HomePage() {
               />
             </div>
             <div className="flex items-center gap-4 text-on-surface-variant">
+              <Link
+                to="/listings/new"
+                className="hidden md:flex items-center gap-1.5 text-sm font-bold text-primary border border-primary/30 rounded-full px-4 py-1.5 hover:bg-primary hover:text-on-primary transition-all"
+              >
+                <span className="material-symbols-outlined text-base">add</span>
+                List an item
+              </Link>
               <button className="material-symbols-outlined hover:text-primary transition-colors active:scale-95 bg-transparent border-none p-0">
                 notifications
               </button>

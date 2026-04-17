@@ -2,16 +2,18 @@ namespace Borro.Application.Items.DTOs;
 
 public record ItemDto(
     Guid Id,
-    Guid OwnerId,
-    string OwnerName,
     string Title,
     string Description,
     decimal DailyPrice,
-    string Location,
     string Category,
-    Dictionary<string, object> Attributes,
+    Guid LenderId,
+    string LenderFirstName,
+    string LenderLastName,
     bool InstantBookEnabled,
+    bool DeliveryAvailable,
+    string Location,
     List<string> HandoverOptions,
-    List<string> ImageUrls,
-    DateTime CreatedAtUtc
-);
+    string[] ImageUrls,
+    Dictionary<string, object> Attributes,
+    DateTime CreatedAtUtc,
+    DateTime UpdatedAtUtc);

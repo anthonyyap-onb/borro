@@ -11,24 +11,19 @@ public class ItemAttributes
 public class Item
 {
     public Guid Id { get; set; }
-    public Guid OwnerId { get; set; }
-    public User Owner { get; set; } = null!;
+    public Guid LenderId { get; set; }
+    public User Lender { get; set; } = null!;
 
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public decimal DailyPrice { get; set; }
     public string Location { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
-
-    /// <summary>Dynamic category-specific attributes stored as JSONB via EF Core .ToJson().</summary>
-    public ItemAttributes Attributes { get; set; } = new();
-
     public bool InstantBookEnabled { get; set; }
+    public bool DeliveryAvailable { get; set; }
 
-    /// <summary>Stored as comma-delimited text, e.g. "OwnerDelivers,RenterPicksUp".</summary>
     public string HandoverOptionsRaw { get; set; } = string.Empty;
 
-    /// <summary>Not mapped — computed from HandoverOptionsRaw.</summary>
     [NotMapped]
     public List<HandoverOption> HandoverOptions
     {
@@ -42,7 +37,8 @@ public class Item
         set => HandoverOptionsRaw = value is null ? string.Empty : string.Join(',', value.Select(h => h.ToString()));
     }
 
-    public List<string> ImageUrls { get; set; } = new();
+    public string[] ImageUrls { get; set; } = [];
+    public ItemAttributes Attributes { get; set; } = new();
 
     public DateTime CreatedAtUtc { get; set; }
     public DateTime UpdatedAtUtc { get; set; }

@@ -1,5 +1,4 @@
 using Borro.Application.Common.Interfaces;
-using Borro.Application.Items.Commands.CreateItem;
 using Borro.Application.Items.DTOs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +13,7 @@ public class SearchItemsQueryHandler : IRequestHandler<SearchItemsQuery, List<It
 
     public async Task<List<ItemDto>> Handle(SearchItemsQuery q, CancellationToken ct)
     {
-        var query = _db.Items.Include(i => i.Owner).AsQueryable();
+        var query = _db.Items.Include(i => i.Lender).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(q.Category))
             query = query.Where(i => i.Category == q.Category);
@@ -26,6 +25,6 @@ public class SearchItemsQueryHandler : IRequestHandler<SearchItemsQuery, List<It
             query = query.Where(i => i.DailyPrice <= q.MaxDailyPrice.Value);
 
         var items = await query.OrderByDescending(i => i.CreatedAtUtc).ToListAsync(ct);
-        return items.Select(i => CreateItemCommandHandler.ToDto(i, i.Owner)).ToList();
+        return items.Select(i => i.ToDto(i.Lender)).ToList();
     }
 }

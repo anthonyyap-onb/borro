@@ -12,6 +12,7 @@ public class BorroDbContext : DbContext, IApplicationDbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<Wishlist> Wishlists => Set<Wishlist>();
+    public DbSet<BlockedDate> BlockedDates => Set<BlockedDate>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -36,10 +37,10 @@ public class BorroDbContext : DbContext, IApplicationDbContext
             entity.Property(i => i.Location).IsRequired().HasMaxLength(200);
             entity.Property(i => i.HandoverOptionsRaw).HasColumnName("handover_options").HasMaxLength(500);
 
-            entity.HasOne(i => i.Owner)
-                .WithMany()
-                .HasForeignKey(i => i.OwnerId)
-                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(i => i.Lender)
+                  .WithMany()
+                  .HasForeignKey(i => i.LenderId)
+                  .OnDelete(DeleteBehavior.Restrict);
 
             // ImageUrls stored as PostgreSQL text[]
             entity.Property(i => i.ImageUrls)
@@ -78,6 +79,16 @@ public class BorroDbContext : DbContext, IApplicationDbContext
             entity.HasKey(w => new { w.UserId, w.ItemId });
             entity.HasOne(w => w.User).WithMany().HasForeignKey(w => w.UserId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(w => w.Item).WithMany().HasForeignKey(w => w.ItemId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<BlockedDate>(entity =>
+        {
+            entity.HasKey(b => b.Id);
+            entity.HasOne(b => b.Item)
+                  .WithMany()
+                  .HasForeignKey(b => b.ItemId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(b => new { b.ItemId, b.Date }).IsUnique();
         });
     }
 }

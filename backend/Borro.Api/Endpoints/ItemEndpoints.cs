@@ -1,10 +1,11 @@
-// backend/Borro.Api/Endpoints/ItemEndpoints.cs
+using System.Security.Claims;
 using Borro.Application.Items.Commands.CreateItem;
 using Borro.Application.Items.Commands.UploadItemImage;
-using Borro.Application.Items.Queries.GetItem;
+using Borro.Application.Items.Queries.GetItemById;
+using Borro.Application.Items.Queries.GetMyItems;
 using Borro.Application.Items.Queries.SearchItems;
 using MediatR;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Borro.Api.Endpoints;
 
@@ -23,48 +24,61 @@ public static class ItemEndpoints
             return Results.Ok(results);
         });
 
+        // GET /api/items/my — lender's own listings (auth required; must come before {id} route)
+        group.MapGet("/my", async (ClaimsPrincipal user, IMediator mediator, CancellationToken ct) =>
+        {
+            var lenderId = ParseUserId(user);
+            if (lenderId is null)
+                return Results.Unauthorized();
+
+            var items = await mediator.Send(new GetMyItemsQuery(lenderId.Value), ct);
+            return Results.Ok(items);
+        }).RequireAuthorization();
+
         // GET /api/items/{id}
         group.MapGet("/{id:guid}", async (Guid id, IMediator mediator, CancellationToken ct) =>
         {
-            try
-            {
-                var item = await mediator.Send(new GetItemQuery(id), ct);
-                return Results.Ok(item);
-            }
-            catch (InvalidOperationException)
-            {
-                return Results.NotFound();
-            }
+            var item = await mediator.Send(new GetItemByIdQuery(id), ct);
+            return item is null ? Results.NotFound(new { error = "Item not found." }) : Results.Ok(item);
         });
 
         // GET /api/items/{id}/availability  — returns blocked dates (Phase 3 will populate this)
         group.MapGet("/{id:guid}/availability", async (Guid id, IMediator mediator, CancellationToken ct) =>
         {
-            // Stub: Phase 3 replaces this with real booked-date logic
             await Task.CompletedTask;
             return Results.Ok(Array.Empty<object>());
         });
 
-        // POST /api/items  (requires auth)
-        group.MapPost("/", async (CreateItemRequest req, ClaimsPrincipal user, IMediator mediator, CancellationToken ct) =>
+        // POST /api/items — create listing (auth required)
+        group.MapPost("/", async (
+            [FromBody] CreateItemRequest req,
+            ClaimsPrincipal user,
+            IMediator mediator,
+            CancellationToken ct) =>
         {
-            var ownerIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? user.FindFirstValue("sub");
-            if (ownerIdClaim is null || !Guid.TryParse(ownerIdClaim, out var ownerId))
+            var lenderId = ParseUserId(user);
+            if (lenderId is null)
                 return Results.Unauthorized();
 
             try
             {
-                var result = await mediator.Send(
+                var item = await mediator.Send(
                     new CreateItemCommand(
-                        ownerId, req.Title, req.Description, req.DailyPrice,
-                        req.Location, req.Category, req.Attributes,
-                        req.InstantBookEnabled, req.HandoverOptions), ct);
-                return Results.Created($"/api/items/{result.Id}", result);
+                        lenderId.Value,
+                        req.Title,
+                        req.Description,
+                        req.DailyPrice,
+                        req.Location,
+                        req.Category,
+                        req.Attributes,
+                        req.InstantBookEnabled,
+                        req.DeliveryAvailable,
+                        req.HandoverOptions), ct);
+                return Results.Created($"/api/items/{item.Id}", item);
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException ex)
             {
-                return Results.BadRequest(new { error = "Item could not be created." });
+                return Results.BadRequest(new { error = ex.Message });
             }
         }).RequireAuthorization();
 
@@ -72,9 +86,8 @@ public static class ItemEndpoints
         group.MapPost("/images", async (
             HttpRequest request, ClaimsPrincipal user, IMediator mediator, CancellationToken ct) =>
         {
-            var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? user.FindFirstValue("sub");
-            if (userIdClaim is null || !Guid.TryParse(userIdClaim, out var userId))
+            var userId = ParseUserId(user);
+            if (userId is null)
                 return Results.Unauthorized();
 
             if (!request.Form.TryGetValue("itemId", out var itemIdStr)
@@ -96,12 +109,12 @@ public static class ItemEndpoints
             {
                 await using var stream = file.OpenReadStream();
                 var url = await mediator.Send(
-                    new UploadItemImageCommand(itemId, userId, stream, file.FileName, file.ContentType), ct);
+                    new UploadItemImageCommand(itemId, userId.Value, stream, file.FileName, file.ContentType), ct);
                 return Results.Ok(new { url });
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException ex)
             {
-                return Results.BadRequest(new { error = "Image could not be uploaded." });
+                return Results.BadRequest(new { error = ex.Message });
             }
             catch (UnauthorizedAccessException)
             {
@@ -112,6 +125,13 @@ public static class ItemEndpoints
         return app;
     }
 
+    private static Guid? ParseUserId(ClaimsPrincipal user)
+    {
+        var sub = user.FindFirstValue(ClaimTypes.NameIdentifier)
+               ?? user.FindFirstValue("sub");
+        return Guid.TryParse(sub, out var id) ? id : null;
+    }
+
     private record CreateItemRequest(
         string Title,
         string Description,
@@ -120,6 +140,7 @@ public static class ItemEndpoints
         string Category,
         Dictionary<string, object> Attributes,
         bool InstantBookEnabled,
+        bool DeliveryAvailable,
         List<string> HandoverOptions
     );
 }

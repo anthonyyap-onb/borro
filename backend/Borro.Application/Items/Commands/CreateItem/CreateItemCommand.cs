@@ -4,7 +4,7 @@ using MediatR;
 namespace Borro.Application.Items.Commands.CreateItem;
 
 public record CreateItemCommand(
-    Guid OwnerId,
+    Guid LenderId,
     string Title,
     string Description,
     decimal DailyPrice,
@@ -12,5 +12,6 @@ public record CreateItemCommand(
     string Category,
     Dictionary<string, object> Attributes,
     bool InstantBookEnabled,
+    bool DeliveryAvailable,
     List<string> HandoverOptions
 ) : IRequest<ItemDto>;
