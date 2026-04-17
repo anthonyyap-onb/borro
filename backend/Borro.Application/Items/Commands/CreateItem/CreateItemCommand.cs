@@ -8,8 +8,11 @@ public record CreateItemCommand(
     string Title,
     string Description,
     decimal DailyPrice,
+    string Location,
     string Category,
+    Dictionary<string, object> Attributes,
     bool InstantBookEnabled,
     bool DeliveryAvailable,
-    string[] ImageUrls,
-    Dictionary<string, object> Attributes) : IRequest<ItemDto>;
+    List<string> HandoverOptions,
+    List<string> ImageUrls
+) : IRequest<ItemDto>;

@@ -1,7 +1,7 @@
 using Borro.Application.Common.Interfaces;
-using Borro.Application.Items;
 using Borro.Application.Items.DTOs;
 using Borro.Domain.Entities;
+using Borro.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,15 +29,21 @@ public class CreateItemCommandHandler : IRequestHandler<CreateItemCommand, ItemD
         var item = new Item
         {
             Id = Guid.NewGuid(),
+            LenderId = request.LenderId,
             Title = request.Title.Trim(),
             Description = request.Description.Trim(),
             DailyPrice = request.DailyPrice,
+            Location = request.Location.Trim(),
             Category = request.Category.Trim(),
-            LenderId = request.LenderId,
+            Attributes = new ItemAttributes { Values = request.Attributes },
             InstantBookEnabled = request.InstantBookEnabled,
             DeliveryAvailable = request.DeliveryAvailable,
-            ImageUrls = request.ImageUrls,
-            Attributes = new ItemAttributes { Values = request.Attributes },
+            HandoverOptions = request.HandoverOptions
+                .Select(s => Enum.TryParse<HandoverOption>(s, out var v)
+                    ? v
+                    : throw new InvalidOperationException($"Invalid handover option: '{s}'."))
+                .ToList(),
+            ImageUrls = request.ImageUrls.ToArray(),
             CreatedAtUtc = now,
             UpdatedAtUtc = now,
         };

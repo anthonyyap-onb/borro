@@ -16,6 +16,8 @@ internal static class ItemMappingExtensions
         lender.LastName,
         item.InstantBookEnabled,
         item.DeliveryAvailable,
+        item.Location,
+        item.HandoverOptions.Select(h => h.ToString()).ToList(),
         item.ImageUrls,
         item.Attributes.Values,
         item.CreatedAtUtc,

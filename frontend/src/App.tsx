@@ -6,6 +6,8 @@ import { ProtectedRoute } from './features/auth/ProtectedRoute';
 import { RegisterPage } from './features/auth/RegisterPage';
 import { HomePage } from './features/home/HomePage';
 import { CreateListingPage } from './features/items/CreateListingPage';
+import { ItemDetailPage } from './features/items/ItemDetailPage';
+import { SearchPage } from './features/items/SearchPage';
 import { ToastProvider } from './lib/toast';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
@@ -28,10 +30,26 @@ function App() {
               }
             />
             <Route
+              path="/search"
+              element={
+                <ProtectedRoute>
+                  <SearchPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/listings/new"
               element={
                 <ProtectedRoute>
                   <CreateListingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/items/:id"
+              element={
+                <ProtectedRoute>
+                  <ItemDetailPage />
                 </ProtectedRoute>
               }
             />
@@ -45,4 +63,3 @@ function App() {
 }
 
 export default App;
-

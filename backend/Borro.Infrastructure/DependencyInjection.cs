@@ -1,3 +1,4 @@
+using Amazon.S3;
 using Borro.Application.Common.Interfaces;
 using Borro.Infrastructure.Persistence;
 using Borro.Infrastructure.Services;
@@ -24,6 +25,21 @@ public static class DependencyInjection
         services.AddSingleton<IJwtService, JwtService>();
         services.AddSingleton<IGoogleTokenVerifier, GoogleTokenVerifier>();
         services.AddScoped<DatabaseSeeder>();
+
+        services.AddSingleton<IAmazonS3>(_ =>
+        {
+            var minioUrl = configuration["MinIO:ServiceUrl"] ?? "http://localhost:9000";
+            var accessKey = configuration["MinIO:AccessKey"] ?? "minioadmin";
+            var secretKey = configuration["MinIO:SecretKey"] ?? "minioadmin";
+
+            var config = new Amazon.S3.AmazonS3Config
+            {
+                ServiceURL = minioUrl,
+                ForcePathStyle = true
+            };
+            return new Amazon.S3.AmazonS3Client(accessKey, secretKey, config);
+        });
+        services.AddScoped<IStorageService, MinioStorageService>();
 
         return services;
     }

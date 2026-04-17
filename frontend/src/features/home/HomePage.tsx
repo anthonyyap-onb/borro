@@ -1,8 +1,9 @@
-import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
 
 export function HomePage() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="bg-surface font-body text-on-surface">
@@ -96,7 +97,10 @@ export function HomePage() {
                     </select>
                   </div>
                 </div>
-                <button className="w-full md:w-auto bg-primary text-on-primary rounded-full px-8 py-4 font-bold flex items-center justify-center gap-2 hover:bg-primary-container transition-all shadow-md active:scale-95 border-none">
+                <button
+                  onClick={() => navigate('/search')}
+                  className="w-full md:w-auto bg-primary text-on-primary rounded-full px-8 py-4 font-bold flex items-center justify-center gap-2 hover:bg-primary-container transition-all shadow-md active:scale-95 border-none"
+                >
                   <span className="material-symbols-outlined">search</span>
                   <span>Explore</span>
                 </button>

@@ -11,6 +11,7 @@ public class BorroDbContext : DbContext, IApplicationDbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<Wishlist> Wishlists => Set<Wishlist>();
     public DbSet<BlockedDate> BlockedDates => Set<BlockedDate>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -33,27 +34,27 @@ public class BorroDbContext : DbContext, IApplicationDbContext
             entity.Property(i => i.Description).IsRequired().HasMaxLength(2000);
             entity.Property(i => i.DailyPrice).HasColumnType("numeric(18,2)");
             entity.Property(i => i.Category).IsRequired().HasMaxLength(100);
+            entity.Property(i => i.Location).IsRequired().HasMaxLength(200);
+            entity.Property(i => i.HandoverOptionsRaw).HasColumnName("handover_options").HasMaxLength(500);
+
             entity.HasOne(i => i.Lender)
                   .WithMany()
                   .HasForeignKey(i => i.LenderId)
                   .OnDelete(DeleteBehavior.Restrict);
-            entity.Property(i => i.ImageUrls)
-                  .HasConversion(
-                      v => string.Join(',', v),
-                      v => v.Length == 0 ? Array.Empty<string>() : v.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                  .Metadata.SetValueComparer(
-                      new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<string[]>(
-                          (a, b) => (a == null && b == null) || (a != null && b != null && a.SequenceEqual(b)),
-                          a => a == null ? 0 : a.Aggregate(0, (h, s) => HashCode.Combine(h, s.GetHashCode())),
-                          a => a == null ? Array.Empty<string>() : a.ToArray()));
 
-            // Map ItemAttributes as a JSONB column using EF Core 8+ owned entity JSON mapping
+            // ImageUrls stored as PostgreSQL text[]
+            entity.Property(i => i.ImageUrls)
+                .HasColumnType("text[]");
+
+            // Ignore the computed HandoverOptions property — only persist HandoverOptionsRaw
+            entity.Ignore(i => i.HandoverOptions);
+
+            // Map ItemAttributes as JSONB via EF Core 8+ owned entity JSON mapping
             entity.OwnsOne(i => i.Attributes, builder =>
             {
                 builder.ToJson();
 
                 var jsonOptions = (System.Text.Json.JsonSerializerOptions?)null;
-
                 var comparer = new ValueComparer<Dictionary<string, object>>(
                     (c1, c2) => System.Text.Json.JsonSerializer.Serialize(c1, jsonOptions)
                                 == System.Text.Json.JsonSerializer.Serialize(c2, jsonOptions),
@@ -73,6 +74,13 @@ public class BorroDbContext : DbContext, IApplicationDbContext
             });
         });
 
+        modelBuilder.Entity<Wishlist>(entity =>
+        {
+            entity.HasKey(w => new { w.UserId, w.ItemId });
+            entity.HasOne(w => w.User).WithMany().HasForeignKey(w => w.UserId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(w => w.Item).WithMany().HasForeignKey(w => w.ItemId).OnDelete(DeleteBehavior.Cascade);
+        });
+
         modelBuilder.Entity<BlockedDate>(entity =>
         {
             entity.HasKey(b => b.Id);
@@ -81,7 +89,6 @@ public class BorroDbContext : DbContext, IApplicationDbContext
                   .HasForeignKey(b => b.ItemId)
                   .OnDelete(DeleteBehavior.Cascade);
             entity.HasIndex(b => new { b.ItemId, b.Date }).IsUnique();
-            // DateOnly maps natively to PostgreSQL 'date' via Npgsql — no converter needed
         });
     }
 }

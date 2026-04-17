@@ -11,6 +11,8 @@ public record ItemDto(
     string LenderLastName,
     bool InstantBookEnabled,
     bool DeliveryAvailable,
+    string Location,
+    List<string> HandoverOptions,
     string[] ImageUrls,
     Dictionary<string, object> Attributes,
     DateTime CreatedAtUtc,
