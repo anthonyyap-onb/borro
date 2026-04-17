@@ -8,6 +8,7 @@ import { HomePage } from './features/home/HomePage';
 import { CreateListingPage } from './features/items/CreateListingPage';
 import { ItemDetailPage } from './features/items/ItemDetailPage';
 import { SearchPage } from './features/items/SearchPage';
+import { BookingDetailPage } from './features/bookings/BookingDetailPage';
 import { ToastProvider } from './lib/toast';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
@@ -50,6 +51,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ItemDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bookings/:id"
+              element={
+                <ProtectedRoute>
+                  <BookingDetailPage />
                 </ProtectedRoute>
               }
             />

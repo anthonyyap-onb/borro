@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { itemApi, type ItemDto } from './itemApi';
+import { bookingApi } from '../bookings/bookingApi';
 
 export function ItemDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -9,6 +10,9 @@ export function ItemDetailPage() {
   const [item, setItem] = useState<ItemDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [booking, setBookingLoading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -17,6 +21,17 @@ export function ItemDetailPage() {
       .catch(() => navigate('/search'))
       .finally(() => setLoading(false));
   }, [id, navigate]);
+
+  const handleBook = async () => {
+    if (!id || !startDate || !endDate || booking) return;
+    setBookingLoading(true);
+    try {
+      const res = await bookingApi.create(id, new Date(startDate).toISOString(), new Date(endDate).toISOString());
+      navigate(`/bookings/${res.data.id}`);
+    } finally {
+      setBookingLoading(false);
+    }
+  };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center font-[Manrope]">Loading...</div>;
   if (!item) return null;
@@ -178,11 +193,11 @@ export function ItemDetailPage() {
               <div className="bg-[#f3f3f3] rounded-xl p-4 mb-4 space-y-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-1">Pick up</p>
-                  <input type="date" className="w-full bg-white rounded-lg px-3 py-2 text-sm text-[#1a1c1c]" />
+                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full bg-white rounded-lg px-3 py-2 text-sm text-[#1a1c1c]" />
                 </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-1">Return</p>
-                  <input type="date" className="w-full bg-white rounded-lg px-3 py-2 text-sm text-[#1a1c1c]" />
+                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} min={startDate} className="w-full bg-white rounded-lg px-3 py-2 text-sm text-[#1a1c1c]" />
                 </div>
               </div>
 
@@ -202,9 +217,13 @@ export function ItemDetailPage() {
                 </div>
               </div>
 
-              {/* Book CTA — Phase 3 wires to booking flow */}
-              <button className="w-full bg-gradient-to-r from-[#005f6c] to-[#007a8a] text-white rounded-full py-4 font-bold text-base hover:opacity-90 transition-opacity border-none cursor-pointer mb-2">
-                {item.instantBookEnabled ? 'Book Now' : 'Request to Book'}
+              {/* Book CTA */}
+              <button
+                onClick={handleBook}
+                disabled={!startDate || !endDate || booking}
+                className="w-full bg-gradient-to-r from-[#005f6c] to-[#007a8a] text-white rounded-full py-4 font-bold text-base hover:opacity-90 transition-opacity border-none cursor-pointer mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {booking ? 'Booking...' : item.instantBookEnabled ? 'Book Now' : 'Request to Book'}
               </button>
               <p className="text-center text-xs text-[#3e494b]">You won't be charged yet</p>
             </div>
