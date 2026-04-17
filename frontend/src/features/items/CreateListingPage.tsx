@@ -1,38 +1,46 @@
 // frontend/src/features/items/CreateListingPage.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { itemApi, type CreateItemPayload, type ItemAttributes } from './itemApi';
+import { itemApi, type CreateItemPayload } from './itemApi';
 
-const CATEGORIES = ['Vehicles', 'Tools & Equipment', 'Electronics', 'Outdoors', 'Event Gear', 'Other'];
+const CATEGORIES: { value: string; label: string }[] = [
+  { value: 'Vehicle', label: 'Vehicles' },
+  { value: 'Electronics', label: 'Electronics' },
+  { value: 'RealEstate', label: 'Real Estate' },
+  { value: 'Tools', label: 'Tools & Equipment' },
+  { value: 'Sports', label: 'Sports & Outdoors' },
+  { value: 'Other', label: 'Other' },
+];
 
-const CATEGORY_FIELDS: Record<string, { label: string; key: string; type: 'text' | 'number' }[]> = {
-  Vehicles: [
-    { label: 'Make & Model', key: 'Model', type: 'text' },
-    { label: 'Year', key: 'Year', type: 'number' },
-    { label: 'Mileage', key: 'Mileage', type: 'number' },
-    { label: 'Transmission', key: 'Transmission', type: 'text' },
-  ],
-  'Tools & Equipment': [
-    { label: 'Brand', key: 'Brand', type: 'text' },
-    { label: 'Voltage / Power', key: 'Power', type: 'text' },
+const CATEGORY_FIELDS: Record<string, { label: string; key: keyof CreateItemPayload; type: 'text' | 'number' }[]> = {
+  Vehicle: [
+    { label: 'Mileage', key: 'mileage', type: 'number' },
+    { label: 'Transmission', key: 'transmission', type: 'text' },
   ],
   Electronics: [
-    { label: 'Brand', key: 'Brand', type: 'text' },
-    { label: 'Model', key: 'Model', type: 'text' },
-    { label: 'Megapixels / Spec', key: 'Spec', type: 'text' },
+    { label: 'Brand', key: 'brand', type: 'text' },
+    { label: 'Megapixels', key: 'megapixels', type: 'number' },
   ],
-  Outdoors: [
-    { label: 'Type', key: 'Type', type: 'text' },
-    { label: 'Capacity / Size', key: 'Size', type: 'text' },
+  RealEstate: [
+    { label: 'Bedrooms', key: 'bedrooms', type: 'number' },
   ],
-  'Event Gear': [
-    { label: 'Type', key: 'Type', type: 'text' },
-    { label: 'Capacity', key: 'Capacity', type: 'number' },
+  Tools: [
+    { label: 'Brand', key: 'brand', type: 'text' },
+    { label: 'Condition', key: 'condition', type: 'text' },
+  ],
+  Sports: [
+    { label: 'Brand', key: 'brand', type: 'text' },
+    { label: 'Condition', key: 'condition', type: 'text' },
   ],
   Other: [],
 };
 
-const HANDOVER_OPTIONS = ['RenterPicksUp', 'OwnerDelivers', 'ThirdPartyDropOff'];
+const HANDOVER_OPTIONS: { value: string; label: string }[] = [
+  { value: 'LocalPickup', label: 'Local Pickup' },
+  { value: 'Delivery', label: 'Delivery' },
+  { value: 'DigitalHandover', label: 'Digital Handover' },
+];
+
 const MAX_PHOTOS = 8;
 
 export function CreateListingPage() {
@@ -47,8 +55,7 @@ export function CreateListingPage() {
     description: '',
     dailyPrice: 0,
     location: '',
-    category: 'Tools & Equipment',
-    attributes: {},
+    category: 'Tools',
     instantBookEnabled: false,
     handoverOptions: [],
   });
@@ -56,8 +63,12 @@ export function CreateListingPage() {
   const set = (key: keyof CreateItemPayload, value: unknown) =>
     setForm(f => ({ ...f, [key]: value }));
 
-  const setAttr = (key: string, value: string) =>
-    setForm(f => ({ ...f, attributes: { ...f.attributes, [key]: value } }));
+  const setAttr = (key: keyof CreateItemPayload, rawValue: string, type: 'text' | 'number') => {
+    const value = type === 'number'
+      ? (rawValue === '' ? undefined : Number(rawValue))
+      : (rawValue || undefined);
+    setForm(f => ({ ...f, [key]: value }));
+  };
 
   const toggleHandover = (opt: string) =>
     set(
@@ -132,7 +143,7 @@ export function CreateListingPage() {
                       value={form.category}
                       onChange={e => set('category', e.target.value)}
                     >
-                      {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                      {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                     </select>
                   </div>
 
@@ -175,7 +186,9 @@ export function CreateListingPage() {
               {/* Dynamic category specs card */}
               {dynamicFields.length > 0 && (
                 <div className="bg-white rounded-2xl p-6 shadow-[0_4px_24px_rgba(26,28,28,0.06)]">
-                  <h2 className="font-[Plus_Jakarta_Sans] font-bold text-lg mb-4">{form.category} Specs</h2>
+                  <h2 className="font-[Plus_Jakarta_Sans] font-bold text-lg mb-4">
+                    {CATEGORIES.find(c => c.value === form.category)?.label ?? form.category} Specs
+                  </h2>
                   <div className="grid grid-cols-2 gap-4">
                     {dynamicFields.map(field => (
                       <div key={field.key}>
@@ -183,8 +196,8 @@ export function CreateListingPage() {
                         <input
                           type={field.type}
                           className="w-full bg-[#f3f3f3] rounded-xl px-4 py-3 text-sm text-[#1a1c1c]"
-                          value={(form.attributes as ItemAttributes)[field.key] as string ?? ''}
-                          onChange={e => setAttr(field.key, e.target.value)}
+                          value={String(form[field.key] ?? '')}
+                          onChange={e => setAttr(field.key, e.target.value, field.type)}
                         />
                       </div>
                     ))}
@@ -228,14 +241,14 @@ export function CreateListingPage() {
                   <label className="block text-xs font-bold uppercase tracking-wider text-[#3e494b] mb-3">Handover Options</label>
                   <div className="flex flex-wrap gap-3">
                     {HANDOVER_OPTIONS.map(opt => (
-                      <label key={opt} className="flex items-center gap-2 cursor-pointer bg-[#f3f3f3] rounded-xl px-4 py-2.5">
+                      <label key={opt.value} className="flex items-center gap-2 cursor-pointer bg-[#f3f3f3] rounded-xl px-4 py-2.5">
                         <input
                           type="checkbox"
-                          checked={form.handoverOptions.includes(opt)}
-                          onChange={() => toggleHandover(opt)}
+                          checked={form.handoverOptions.includes(opt.value)}
+                          onChange={() => toggleHandover(opt.value)}
                           className="accent-[#005f6c]"
                         />
-                        <span className="text-sm font-semibold text-[#1a1c1c]">{opt.replace(/([A-Z])/g, ' $1').trim()}</span>
+                        <span className="text-sm font-semibold text-[#1a1c1c]">{opt.label}</span>
                       </label>
                     ))}
                   </div>

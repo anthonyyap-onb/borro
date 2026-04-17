@@ -1,8 +1,12 @@
-// frontend/src/features/items/itemApi.ts
 import apiClient from '../../lib/apiClient';
 
-export interface ItemAttributes {
-  [key: string]: string | number | boolean;
+export interface ItemAttributesDto {
+  mileage?: number;
+  transmission?: string;
+  bedrooms?: number;
+  megapixels?: number;
+  brand?: string;
+  condition?: string;
 }
 
 export interface ItemDto {
@@ -14,11 +18,12 @@ export interface ItemDto {
   dailyPrice: number;
   location: string;
   category: string;
-  attributes: ItemAttributes;
+  attributes: ItemAttributesDto;
   instantBookEnabled: boolean;
   handoverOptions: string[];
   imageUrls: string[];
   createdAtUtc: string;
+  updatedAtUtc: string;
 }
 
 export interface CreateItemPayload {
@@ -27,9 +32,14 @@ export interface CreateItemPayload {
   dailyPrice: number;
   location: string;
   category: string;
-  attributes: ItemAttributes;
   instantBookEnabled: boolean;
   handoverOptions: string[];
+  mileage?: number;
+  transmission?: string;
+  bedrooms?: number;
+  megapixels?: number;
+  brand?: string;
+  condition?: string;
 }
 
 export interface SearchParams {
