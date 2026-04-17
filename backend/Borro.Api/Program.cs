@@ -2,6 +2,7 @@ using System.Text;
 using Borro.Api.Endpoints;
 using Borro.Application;
 using Borro.Infrastructure;
+using Borro.Infrastructure.Hubs;
 using Borro.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -48,9 +49,23 @@ builder.Services
             ValidAudience = builder.Configuration["Jwt:Audience"] ?? "borro-frontend",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         };
+        // SignalR WebSocket connections cannot send Authorization headers,
+        // so the JWT is passed as a query param ?access_token=...
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                var token = ctx.Request.Query["access_token"];
+                var path = ctx.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(token) && path.StartsWithSegments("/hubs"))
+                    ctx.Token = token;
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddSignalR();
 
 // ── CORS ───────────────────────────────────────────────────────────────────────
 const string CorsPolicyName = "BorroFrontend";
@@ -97,5 +112,6 @@ app.MapHealthEndpoints();
 app.MapAuthEndpoints();
 app.MapItemEndpoints();
 app.MapBlockedDatesEndpoints();
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();
