@@ -8,6 +8,8 @@ export interface BookingDto {
   id: string;
   itemId: string;
   itemTitle: string;
+  itemImageUrl: string | null;
+  dailyPrice: number;
   renterId: string;
   renterName: string;
   lenderId: string;

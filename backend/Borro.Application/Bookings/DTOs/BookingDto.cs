@@ -6,6 +6,8 @@ public record BookingDto(
     Guid Id,
     Guid ItemId,
     string ItemTitle,
+    string? ItemImageUrl,
+    decimal DailyPrice,
     Guid RenterId,
     string RenterName,
     Guid LenderId,
