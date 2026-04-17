@@ -20,13 +20,13 @@ public class UploadItemImageCommandHandler : IRequestHandler<UploadItemImageComm
         var item = await _db.Items.FirstOrDefaultAsync(i => i.Id == cmd.ItemId, ct)
             ?? throw new InvalidOperationException($"Item {cmd.ItemId} not found.");
 
-        if (item.OwnerId != cmd.RequestingUserId)
+        if (item.LenderId != cmd.RequestingUserId)
             throw new UnauthorizedAccessException("Only the item owner can upload images.");
 
         var uniqueFileName = $"items/{cmd.ItemId}/{Guid.NewGuid()}_{cmd.FileName}";
         var url = await _storage.UploadFileAsync(cmd.FileStream, uniqueFileName, cmd.ContentType, ct);
 
-        item.ImageUrls.Add(url);
+        item.ImageUrls = [..item.ImageUrls, url];
         item.UpdatedAtUtc = DateTime.UtcNow;
         await _db.SaveChangesAsync(ct);
 
