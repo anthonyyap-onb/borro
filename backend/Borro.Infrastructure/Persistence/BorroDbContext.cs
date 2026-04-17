@@ -13,6 +13,8 @@ public class BorroDbContext : DbContext, IApplicationDbContext
     public DbSet<Item> Items => Set<Item>();
     public DbSet<Wishlist> Wishlists => Set<Wishlist>();
     public DbSet<BlockedDate> BlockedDates => Set<BlockedDate>();
+    public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<Message> Messages => Set<Message>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

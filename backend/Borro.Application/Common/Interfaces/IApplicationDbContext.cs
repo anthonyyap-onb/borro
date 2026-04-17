@@ -9,5 +9,7 @@ public interface IApplicationDbContext
     DbSet<Item> Items { get; }
     DbSet<Wishlist> Wishlists { get; }
     DbSet<BlockedDate> BlockedDates { get; }
+    DbSet<Booking> Bookings { get; }
+    DbSet<Message> Messages { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
