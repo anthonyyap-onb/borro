@@ -112,6 +112,7 @@ app.MapHealthEndpoints();
 app.MapAuthEndpoints();
 app.MapItemEndpoints();
 app.MapBlockedDatesEndpoints();
+app.MapBookingEndpoints();
 app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();

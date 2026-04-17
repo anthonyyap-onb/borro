@@ -1,11 +1,14 @@
 using System.Security.Claims;
+using Borro.Application.Common.Interfaces;
 using Borro.Application.Items.Commands.CreateItem;
 using Borro.Application.Items.Commands.UploadItemImage;
 using Borro.Application.Items.Queries.GetItemById;
 using Borro.Application.Items.Queries.GetMyItems;
 using Borro.Application.Items.Queries.SearchItems;
+using Borro.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Borro.Api.Endpoints;
 
@@ -42,11 +45,16 @@ public static class ItemEndpoints
             return item is null ? Results.NotFound(new { error = "Item not found." }) : Results.Ok(item);
         });
 
-        // GET /api/items/{id}/availability  — returns blocked dates (Phase 3 will populate this)
-        group.MapGet("/{id:guid}/availability", async (Guid id, IMediator mediator, CancellationToken ct) =>
+        // GET /api/items/{id}/availability — returns booked date ranges from confirmed bookings
+        group.MapGet("/{id:guid}/availability", async (Guid id, IApplicationDbContext db, CancellationToken ct) =>
         {
-            await Task.CompletedTask;
-            return Results.Ok(Array.Empty<object>());
+            var bookedRanges = await db.Bookings
+                .Where(b => b.ItemId == id &&
+                       b.Status != BookingStatus.Cancelled &&
+                       b.Status != BookingStatus.Disputed)
+                .Select(b => new { b.StartDateUtc, b.EndDateUtc })
+                .ToListAsync(ct);
+            return Results.Ok(bookedRanges);
         });
 
         // POST /api/items — create listing (auth required)
