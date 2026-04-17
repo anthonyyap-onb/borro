@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build *)",
+      "Bash(dotnet test *)",
+      "Bash(dotnet ef *)",
+      "Bash(git -C \"C:/Users/GeanKyleUkaLeonor/.config/superpowers/worktrees/borro/phase-2-dynamic-listing-engine\" log --oneline main..feature/phase-2-dynamic-listing-engine)",
+      "Bash(git -C \"C:/Users/GeanKyleUkaLeonor/.config/superpowers/worktrees/borro/phase-2-dynamic-listing-engine\" log --oneline feature/phase-2-dynamic-listing-engine..main)",
+      "Bash(git *)",
+      "Bash(docker buildx *)",
+      "Bash(docker builder *)"
+    ]
+  }
+}
