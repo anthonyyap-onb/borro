@@ -261,7 +261,7 @@ public class CreateBookingCommandHandlerTests
         var renter = new User { Id = Guid.NewGuid(), Email = "renter@t.com", FirstName = "Ren", LastName = "Ter", CreatedAtUtc = DateTime.UtcNow, UpdatedAtUtc = DateTime.UtcNow };
         var item = new Item
         {
-            Id = Guid.NewGuid(), OwnerId = lender.Id, Owner = lender,
+            Id = Guid.NewGuid(), LenderId = lender.Id, Owner = lender,
             Title = "Drill", Description = "desc", DailyPrice = 20m,
             Location = "Portland", Category = "Tools",
             Attributes = new ItemAttributes { Values = new() },
@@ -371,7 +371,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             .FirstOrDefaultAsync(i => i.Id == cmd.ItemId, ct)
             ?? throw new InvalidOperationException($"Item {cmd.ItemId} not found.");
 
-        if (item.OwnerId == cmd.RenterId)
+        if (item.LenderId == cmd.RenterId)
             throw new InvalidOperationException("You cannot book your own item.");
 
         var renter = await _db.Users.FirstOrDefaultAsync(u => u.Id == cmd.RenterId, ct)
@@ -405,7 +405,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         ItemTitle: item.Title,
         RenterId: b.RenterId,
         RenterName: $"{renter.FirstName} {renter.LastName}",
-        LenderId: item.OwnerId,
+        LenderId: item.LenderId,
         LenderName: $"{item.Owner.FirstName} {item.Owner.LastName}",
         StartDateUtc: b.StartDateUtc,
         EndDateUtc: b.EndDateUtc,
@@ -466,7 +466,7 @@ public class TransitionBookingCommandHandlerTests
         var ctx = CreateContext();
         var lender = new User { Id = Guid.NewGuid(), Email = "l@t.com", FirstName = "L", LastName = "L", CreatedAtUtc = DateTime.UtcNow, UpdatedAtUtc = DateTime.UtcNow };
         var renter = new User { Id = Guid.NewGuid(), Email = "r@t.com", FirstName = "R", LastName = "R", CreatedAtUtc = DateTime.UtcNow, UpdatedAtUtc = DateTime.UtcNow };
-        var item = new Item { Id = Guid.NewGuid(), OwnerId = lender.Id, Owner = lender, Title = "T", Description = "D", DailyPrice = 10m, Location = "L", Category = "C", Attributes = new ItemAttributes { Values = new() }, ImageUrls = new(), CreatedAtUtc = DateTime.UtcNow, UpdatedAtUtc = DateTime.UtcNow };
+        var item = new Item { Id = Guid.NewGuid(), LenderId = lender.Id, Owner = lender, Title = "T", Description = "D", DailyPrice = 10m, Location = "L", Category = "C", Attributes = new ItemAttributes { Values = new() }, ImageUrls = new(), CreatedAtUtc = DateTime.UtcNow, UpdatedAtUtc = DateTime.UtcNow };
         var booking = new Booking { Id = Guid.NewGuid(), ItemId = item.Id, Item = item, RenterId = renter.Id, Renter = renter, StartDateUtc = DateTime.UtcNow.AddDays(1), EndDateUtc = DateTime.UtcNow.AddDays(3), TotalPrice = 20m, Status = status, CreatedAtUtc = DateTime.UtcNow, UpdatedAtUtc = DateTime.UtcNow };
         ctx.Users.AddRange(lender, renter);
         ctx.Items.Add(item);
@@ -596,7 +596,7 @@ public class TransitionBookingCommandHandler : IRequestHandler<TransitionBooking
             throw new InvalidOperationException(
                 $"Transition from {booking.Status} to {cmd.TargetStatus} is not allowed.");
 
-        var isLender = booking.Item.OwnerId == cmd.RequestingUserId;
+        var isLender = booking.Item.LenderId == cmd.RequestingUserId;
         var isRenter = booking.RenterId == cmd.RequestingUserId;
 
         var authorized = requiredRole switch
@@ -689,7 +689,7 @@ public class GetBookingQueryHandler : IRequestHandler<GetBookingQuery, BookingDt
 
         // Only lender or renter can view
         var isParticipant = booking.RenterId == q.RequestingUserId
-                         || booking.Item.OwnerId == q.RequestingUserId;
+                         || booking.Item.LenderId == q.RequestingUserId;
         if (!isParticipant)
             throw new UnauthorizedAccessException("Access denied.");
 
@@ -732,7 +732,7 @@ public class GetUserBookingsQueryHandler : IRequestHandler<GetUserBookingsQuery,
         var bookings = await _db.Bookings
             .Include(b => b.Item).ThenInclude(i => i.Owner)
             .Include(b => b.Renter)
-            .Where(b => b.RenterId == q.UserId || b.Item.OwnerId == q.UserId)
+            .Where(b => b.RenterId == q.UserId || b.Item.LenderId == q.UserId)
             .OrderByDescending(b => b.CreatedAtUtc)
             .ToListAsync(ct);
 
@@ -781,7 +781,7 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
             .FirstOrDefaultAsync(b => b.Id == cmd.BookingId, ct)
             ?? throw new InvalidOperationException($"Booking {cmd.BookingId} not found.");
 
-        var isParticipant = booking.RenterId == cmd.SenderId || booking.Item.OwnerId == cmd.SenderId;
+        var isParticipant = booking.RenterId == cmd.SenderId || booking.Item.LenderId == cmd.SenderId;
         if (!isParticipant)
             throw new UnauthorizedAccessException("Only booking participants can send messages.");
 
@@ -838,7 +838,7 @@ public class GetMessagesQueryHandler : IRequestHandler<GetMessagesQuery, List<Me
             .FirstOrDefaultAsync(b => b.Id == q.BookingId, ct)
             ?? throw new InvalidOperationException($"Booking {q.BookingId} not found.");
 
-        var isParticipant = booking.RenterId == q.RequestingUserId || booking.Item.OwnerId == q.RequestingUserId;
+        var isParticipant = booking.RenterId == q.RequestingUserId || booking.Item.LenderId == q.RequestingUserId;
         if (!isParticipant) throw new UnauthorizedAccessException("Access denied.");
 
         var messages = await _db.Messages
