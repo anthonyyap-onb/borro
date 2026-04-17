@@ -33,9 +33,9 @@ public class CreateItemCommandHandlerTests
         ctx.Users.Add(owner);
         await ctx.SaveChangesAsync(CancellationToken.None);
 
-        var handler = new CreateItemCommandHandler(ctx);
+        var handler = new CreateItemCommandHandler(ctx, TimeProvider.System);
         var cmd = new CreateItemCommand(
-            OwnerId: owner.Id,
+            LenderId: owner.Id,
             Title: "DeWalt Drill",
             Description: "Heavy-duty cordless drill",
             DailyPrice: 15m,
@@ -43,14 +43,16 @@ public class CreateItemCommandHandlerTests
             Category: "Tools",
             Attributes: new Dictionary<string, object> { ["Voltage"] = "20V" },
             InstantBookEnabled: true,
-            HandoverOptions: new List<string> { "RenterPicksUp" }
+            DeliveryAvailable: false,
+            HandoverOptions: new List<string> { "RenterPicksUp" },
+            ImageUrls: new List<string>()
         );
 
         var result = await handler.Handle(cmd, CancellationToken.None);
 
         Assert.Equal("DeWalt Drill", result.Title);
         Assert.Equal(15m, result.DailyPrice);
-        Assert.Equal(owner.Id, result.OwnerId);
+        Assert.Equal(owner.Id, result.LenderId);
         Assert.True(result.InstantBookEnabled);
         Assert.Single(ctx.Items);
     }
@@ -59,9 +61,9 @@ public class CreateItemCommandHandlerTests
     public async Task Handle_UnknownOwner_ThrowsInvalidOperationException()
     {
         await using var ctx = CreateContext();
-        var handler = new CreateItemCommandHandler(ctx);
+        var handler = new CreateItemCommandHandler(ctx, TimeProvider.System);
         var cmd = new CreateItemCommand(
-            OwnerId: Guid.NewGuid(),
+            LenderId: Guid.NewGuid(),
             Title: "Camera",
             Description: "DSLR",
             DailyPrice: 50m,
@@ -69,7 +71,9 @@ public class CreateItemCommandHandlerTests
             Category: "Electronics",
             Attributes: new Dictionary<string, object>(),
             InstantBookEnabled: false,
-            HandoverOptions: new List<string>()
+            DeliveryAvailable: false,
+            HandoverOptions: new List<string>(),
+            ImageUrls: new List<string>()
         );
 
         await Assert.ThrowsAsync<InvalidOperationException>(

@@ -43,7 +43,7 @@ public class CreateItemCommandHandler : IRequestHandler<CreateItemCommand, ItemD
                     ? v
                     : throw new InvalidOperationException($"Invalid handover option: '{s}'."))
                 .ToList(),
-            ImageUrls = [],
+            ImageUrls = request.ImageUrls.ToArray(),
             CreatedAtUtc = now,
             UpdatedAtUtc = now,
         };

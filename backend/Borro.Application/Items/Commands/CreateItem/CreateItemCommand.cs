@@ -13,5 +13,6 @@ public record CreateItemCommand(
     Dictionary<string, object> Attributes,
     bool InstantBookEnabled,
     bool DeliveryAvailable,
-    List<string> HandoverOptions
+    List<string> HandoverOptions,
+    List<string> ImageUrls
 ) : IRequest<ItemDto>;

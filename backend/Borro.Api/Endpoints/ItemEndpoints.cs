@@ -68,12 +68,13 @@ public static class ItemEndpoints
                         req.Title,
                         req.Description,
                         req.DailyPrice,
-                        req.Location,
+                        req.Location ?? string.Empty,
                         req.Category,
                         req.Attributes,
                         req.InstantBookEnabled,
                         req.DeliveryAvailable,
-                        req.HandoverOptions), ct);
+                        req.HandoverOptions ?? [],
+                        req.ImageUrls ?? []), ct);
                 return Results.Created($"/api/items/{item.Id}", item);
             }
             catch (InvalidOperationException ex)
@@ -136,11 +137,12 @@ public static class ItemEndpoints
         string Title,
         string Description,
         decimal DailyPrice,
-        string Location,
         string Category,
         Dictionary<string, object> Attributes,
         bool InstantBookEnabled,
         bool DeliveryAvailable,
-        List<string> HandoverOptions
+        List<string>? ImageUrls = null,
+        string? Location = null,
+        List<string>? HandoverOptions = null
     );
 }
