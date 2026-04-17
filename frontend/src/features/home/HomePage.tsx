@@ -1,62 +1,12 @@
-import { useAuth } from '../auth/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Navbar } from '../../components/Navbar';
 
 export function HomePage() {
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   return (
     <div className="bg-surface font-body text-on-surface">
-
-      {/* Top Nav */}
-      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm">
-        <div className="flex justify-between items-center px-6 py-4 max-w-screen-2xl mx-auto">
-          <div className="flex items-center gap-12">
-            <span className="text-2xl font-black text-primary font-headline tracking-tight">Borro</span>
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#" className="text-primary font-semibold border-b-2 border-primary transition-colors">Home</a>
-              <a href="#" className="text-on-surface-variant font-medium hover:text-primary transition-colors">How it Works</a>
-            </div>
-          </div>
-          <div className="flex items-center gap-6">
-            <div className="hidden lg:flex items-center bg-surface-container-low rounded-full px-4 py-2 border border-outline-variant/15">
-              <span className="material-symbols-outlined text-on-surface-variant text-sm mr-2">search</span>
-              <input
-                className="bg-transparent border-none focus:ring-0 text-sm w-48 font-medium outline-none"
-                placeholder="Search anything..."
-                type="text"
-              />
-            </div>
-            <div className="flex items-center gap-4 text-on-surface-variant">
-              <Link
-                to="/listings/new"
-                className="hidden md:flex items-center gap-1.5 text-sm font-bold text-primary border border-primary/30 rounded-full px-4 py-1.5 hover:bg-primary hover:text-on-primary transition-all"
-              >
-                <span className="material-symbols-outlined text-base">add</span>
-                List an item
-              </Link>
-              <button className="material-symbols-outlined hover:text-primary transition-colors active:scale-95 bg-transparent border-none p-0">
-                notifications
-              </button>
-              <button className="material-symbols-outlined hover:text-primary transition-colors active:scale-95 bg-transparent border-none p-0">
-                chat_bubble
-              </button>
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-on-primary text-sm font-bold border border-outline-variant/30">
-                  {user?.firstName?.[0]?.toUpperCase() ?? '?'}
-                </div>
-                <button
-                  onClick={logout}
-                  className="hidden md:block text-xs font-bold text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none p-0"
-                >
-                  Log out
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-
+      <Navbar />
       <main className="pt-20 pb-32">
 
         {/* Hero */}

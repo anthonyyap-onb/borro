@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { bookingApi, type BookingDto, type BookingStatus } from './bookingApi';
 import { useChat } from './useChat';
+import { Navbar } from '../../components/Navbar';
 
 const STATUS_LABELS: Record<BookingStatus, string> = {
   PendingApproval: 'Pending Approval',
@@ -117,23 +118,7 @@ export function BookingDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#f9f9f9] font-[Manrope]">
-      {/* Top App Bar */}
-      <header className="bg-[#f9f9f9]/90 backdrop-blur-xl fixed top-0 z-50 w-full">
-        <div className="flex justify-between items-center px-6 py-4 w-full max-w-7xl mx-auto">
-          <div className="flex items-center gap-8">
-            <span className="font-[Plus_Jakarta_Sans] font-extrabold text-2xl text-[#007A8A] tracking-tight">Borro</span>
-            <nav className="hidden md:flex gap-6 items-center">
-              <a className="text-[#3e494b] hover:bg-[#f3f3f3] px-3 py-2 rounded-lg transition-colors font-medium cursor-pointer" onClick={() => navigate('/search')}>Explore</a>
-              <a className="text-[#007A8A] font-bold px-3 py-2 rounded-lg transition-colors cursor-pointer">Bookings</a>
-            </nav>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="material-symbols-outlined text-[#3e494b] p-2 hover:bg-[#f3f3f3] rounded-full transition-colors border-none bg-transparent cursor-pointer">notifications</button>
-          </div>
-        </div>
-        <div className="h-px bg-[#e2e2e2]/50 w-full" />
-      </header>
-
+      <Navbar />
       <main className="pt-24 pb-12 px-6 max-w-7xl mx-auto min-h-screen">
         {/* Breadcrumb */}
         <div className="mb-8 flex items-center gap-4">
