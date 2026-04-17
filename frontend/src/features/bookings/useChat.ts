@@ -2,7 +2,8 @@ import * as signalR from '@microsoft/signalr';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MessageDto } from './bookingApi';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8180';
+// Empty string = relative origin; Vite proxy forwards /hubs → backend.
+const API_URL = '';
 
 export function useChat(bookingId: string) {
   const [messages, setMessages] = useState<MessageDto[]>([]);

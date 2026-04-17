@@ -77,7 +77,8 @@ builder.Services.AddCors(options =>
             .WithOrigins(
                 "http://localhost:5173",   // Vite dev server (local)
                 "http://frontend:5173",    // Docker service name
-                "http://localhost:3000"    // fallback
+                "http://localhost:3000",    // fallback
+                "https://c903-2001-4456-c91-2600-7950-b97b-d475-9cdb.ngrok-free.app" //ngrok
             )
             .AllowAnyHeader()
             .AllowAnyMethod()

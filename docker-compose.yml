@@ -97,7 +97,8 @@ services:
     restart: unless-stopped
     environment:
       # This is read by Vite at startup inside the container
-      VITE_API_URL: http://localhost:8180
+      # Server-side proxy target (used by vite.config.ts in Node, not the browser)
+      BACKEND_PROXY_URL: http://backend:8080
       VITE_GOOGLE_CLIENT_ID: 1073363180552-ekk80ab19ko8ehffgdj454hifrkn4dov.apps.googleusercontent.com
     ports:
       - "5173:5173"
