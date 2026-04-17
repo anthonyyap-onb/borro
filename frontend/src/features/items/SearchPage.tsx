@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { itemApi, type ItemDto } from './itemApi';
+import { Navbar } from '../../components/Navbar';
 
 const CATEGORIES = ['All Categories', 'Vehicles', 'Tools & Equipment', 'Electronics', 'Outdoors', 'Event Gear', 'Other'];
 
@@ -36,19 +37,8 @@ export function SearchPage() {
 
   return (
     <div className="min-h-screen bg-[#f9f9f9] font-[Manrope]">
-      {/* Nav */}
-      <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-md shadow-[0_2px_12px_rgba(26,28,28,0.06)]">
-        <div className="max-w-screen-2xl mx-auto px-8 h-16 flex items-center gap-6">
-          <span className="font-[Plus_Jakarta_Sans] font-black text-2xl text-[#005f6c]">Borro</span>
-          <nav className="flex gap-6 ml-auto text-sm font-semibold text-[#1a1c1c]">
-            <a href="#" className="text-[#005f6c]">Explore</a>
-            <Link to="/items/new">List an Item</Link>
-            <a href="#">How it Works</a>
-          </nav>
-        </div>
-      </header>
-
-      <div className="max-w-screen-2xl mx-auto px-8 py-8 flex gap-8">
+      <Navbar />
+      <div className="max-w-screen-2xl mx-auto px-8 pt-24 pb-8 flex gap-8">
 
         {/* Left sidebar filters */}
         <aside className="w-72 shrink-0">
