@@ -1,7 +1,6 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11626.88 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Borro.Domain", "Borro.Domain\Borro.Domain.csproj", "{AB5C8140-8C24-4FE1-9AAD-6510C7495CAB}"
 EndProject
@@ -87,10 +86,21 @@ Global
 		{A41DE4D8-7E84-4086-91AB-D854B8DFC084}.Release|x86.Build.0 = Release|Any CPU
 		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Debug|x64.Build.0 = Debug|Any CPU
+		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Debug|x86.Build.0 = Debug|Any CPU
 		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Release|x64.ActiveCfg = Release|Any CPU
+		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Release|x64.Build.0 = Release|Any CPU
+		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Release|x86.ActiveCfg = Release|Any CPU
+		{CF9950F7-1156-48C8-8F9F-4382A583D9E8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E2E65C64-49CC-4008-ACF5-4EAE53B38AA1}
 	EndGlobalSection
 EndGlobal
