@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Borro.Api.Endpoints;
 using Borro.Application;
 using Borro.Infrastructure;
@@ -11,6 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ── Core Services ──────────────────────────────────────────────────────────────
 builder.Services.AddSingleton(TimeProvider.System);
+
+// Serialize enums as strings (e.g. BookingStatus as "PendingApproval" not 0)
+builder.Services.ConfigureHttpJsonOptions(opts =>
+    opts.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
 builder.Services.AddOpenApi();
 builder.Services.AddOpenApiDocument(config =>
 {

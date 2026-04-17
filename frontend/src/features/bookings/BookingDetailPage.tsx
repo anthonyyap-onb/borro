@@ -111,6 +111,7 @@ export function BookingDetailPage() {
   const isRenter = user?.userId === booking.renterId;
   const days = diffDays(booking.startDateUtc, booking.endDateUtc);
   const otherName = isLender ? booking.renterName : booking.lenderName;
+  const dailyPrice = booking.dailyPrice ?? 0;
   const serviceFee = booking.totalPrice * 0.05;
   const lenderPayout = booking.totalPrice - serviceFee;
 
@@ -154,6 +155,7 @@ export function BookingDetailPage() {
               <RenterView
                 booking={booking}
                 days={days}
+                dailyPrice={dailyPrice}
                 transitioning={transitioning}
                 onTransition={handleTransition}
               />
@@ -161,6 +163,7 @@ export function BookingDetailPage() {
               <LenderView
                 booking={booking}
                 days={days}
+                dailyPrice={dailyPrice}
                 serviceFee={serviceFee}
                 lenderPayout={lenderPayout}
                 transitioning={transitioning}
@@ -193,10 +196,11 @@ export function BookingDetailPage() {
 
 /* ─── Renter View ─────────────────────────────────────────── */
 function RenterView({
-  booking, days, transitioning, onTransition,
+  booking, days, dailyPrice, transitioning, onTransition,
 }: {
   booking: BookingDto;
   days: number;
+  dailyPrice: number;
   transitioning: boolean;
   onTransition: (s: BookingStatus) => void;
 }) {
@@ -240,7 +244,7 @@ function RenterView({
             </div>
             <div className="text-right">
               <div className="text-2xl font-extrabold text-[#005f6c]">
-                ${booking.dailyPrice.toFixed(2)}<span className="text-sm font-normal text-[#6e797b]">/day</span>
+                ${dailyPrice.toFixed(2)}<span className="text-sm font-normal text-[#6e797b]">/day</span>
               </div>
             </div>
           </div>
@@ -331,7 +335,7 @@ function RenterView({
           </h3>
           <div className="space-y-3 text-sm">
             <div className="flex justify-between items-center">
-              <span className="text-[#3e494b]">${booking.dailyPrice.toFixed(2)} × {days} {days === 1 ? 'day' : 'days'}</span>
+              <span className="text-[#3e494b]">${dailyPrice.toFixed(2)} × {days} {days === 1 ? 'day' : 'days'}</span>
               <span className="font-medium">${booking.totalPrice.toFixed(2)}</span>
             </div>
             <div className="h-px bg-[#bdc8cb]/30" />
@@ -348,10 +352,11 @@ function RenterView({
 
 /* ─── Lender View ─────────────────────────────────────────── */
 function LenderView({
-  booking, days, serviceFee, lenderPayout, transitioning, onTransition,
+  booking, days, dailyPrice, serviceFee, lenderPayout, transitioning, onTransition,
 }: {
   booking: BookingDto;
   days: number;
+  dailyPrice: number;
   serviceFee: number;
   lenderPayout: number;
   transitioning: boolean;
@@ -421,7 +426,7 @@ function LenderView({
         <h3 className="font-[Plus_Jakarta_Sans] text-xl font-bold mb-6">Financial Summary</h3>
         <div className="space-y-4 text-sm">
           <div className="flex justify-between items-center text-[#3e494b]">
-            <span>${booking.dailyPrice.toFixed(2)} × {days} {days === 1 ? 'day' : 'days'}</span>
+            <span>${dailyPrice.toFixed(2)} × {days} {days === 1 ? 'day' : 'days'}</span>
             <span>${booking.totalPrice.toFixed(2)}</span>
           </div>
           <div className="flex justify-between items-center text-[#3e494b]">
